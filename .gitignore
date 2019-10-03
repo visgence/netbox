@@ -6,6 +6,7 @@
 /netbox/scripts/*
 !/netbox/scripts/__init__.py
 /netbox/static
+site/*
 .idea
 /*.sh
 !upgrade.sh
