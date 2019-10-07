@@ -2,33 +2,33 @@ from django.urls import path
 
 from extras.views import ObjectChangeLogView
 from . import views
-from .models import Phone, IPPhonePartition
+from .models import Extension, Partition
 
 app_name = 'ipphone'
 urlpatterns = [
 
-    # Phones
-    path(r'phones/', views.PhoneListView.as_view(), name='phone_list'),
-    path(r'phones/add/', views.PhoneCreateView.as_view(), name='phone_add'),
-    path(r'phones/bulk-add/', views.PhoneBulkCreateView.as_view(), name='phone_bulk_add'),
-    path(r'phones/import/', views.PhoneBulkImportView.as_view(), name='phone_import'),
-    path(r'phones/edit/', views.PhoneBulkEditView.as_view(), name='phone_bulk_edit'),
-    path(r'phones/delete/', views.PhoneBulkDeleteView.as_view(), name='phone_bulk_delete'),
-    path(r'phones/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name='phone_changelog', kwargs={'model': Phone}),
-    path(r'phones/assign/', views.PhoneAssignView.as_view(), name='phone_assign'),
-    path(r'phones/<int:pk>/', views.PhoneView.as_view(), name='phone'),
-    path(r'phones/<int:pk>/edit/', views.PhoneEditView.as_view(), name='phone_edit'),
-    path(r'phones/<int:pk>/delete/', views.PhoneDeleteView.as_view(), name='phone_delete'),
+    # Extensions
+    path(r'extensions/', views.ExtensionListView.as_view(), name='extension_list'),
+    path(r'extensions/add/', views.ExtensionCreateView.as_view(), name='extension_add'),
+    path(r'extensions/bulk-add/', views.ExtensionBulkCreateView.as_view(), name='extension_bulk_add'),
+    path(r'extensions/import/', views.ExtensionBulkImportView.as_view(), name='extension_import'),
+    path(r'extensions/edit/', views.ExtensionBulkEditView.as_view(), name='extension_bulk_edit'),
+    path(r'extensions/delete/', views.ExtensionBulkDeleteView.as_view(), name='extension_bulk_delete'),
+    path(r'extensions/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name='extension_changelog', kwargs={'model': Extension}),
+    path(r'extensions/assign/', views.ExtensionAssignView.as_view(), name='extension_assign'),
+    path(r'extensions/<int:pk>/', views.ExtensionView.as_view(), name='extension'),
+    path(r'extensions/<int:pk>/edit/', views.ExtensionEditView.as_view(), name='extension_edit'),
+    path(r'extensions/<int:pk>/delete/', views.ExtensionDeleteView.as_view(), name='extension_delete'),
 
-    # IPPhonePartitions
+    # Partitions
 
-    path(r'ipphonepartitions/', views.IPPhonePartitionListView.as_view(), name='ipphonepartition_list'),
-    path(r'ipphonepartitions/add/', views.IPPhonePartitionCreateView.as_view(), name='ipphonepartition_add'),
-    path(r'ipphonepartitions/import/', views.IPPhonePartitionBulkImportView.as_view(), name='ipphonepartition_import'),
-    path(r'ipphonepartitions/edit/', views.IPPhonePartitionBulkEditView.as_view(), name='ipphonepartition_bulk_edit'),
-    path(r'ipphonepartitions/delete/', views.IPPhonePartitionBulkDeleteView.as_view(), name='ipphonepartition_bulk_delete'),
-    path(r'ipphonepartitions/<int:pk>/', views.IPPhonePartitionView.as_view(), name='ipphonepartitions'),
-    path(r'ipphonepartitions/<int:pk>/edit/', views.IPPhonePartitionEditView.as_view(), name='ipphonepartition_edit'),
-    path(r'ipphonepartitions/<int:pk>/delete/', views.IPPhonePartitionDeleteView.as_view(), name='ipphonepartition_delete'),
-    path(r'ipphonepartitions/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name='ipphonepartition_changelog', kwargs={'model': IPPhonePartition}),
+    path(r'partitions/', views.PartitionListView.as_view(), name='partition_list'),
+    path(r'partitions/add/', views.PartitionCreateView.as_view(), name='partition_add'),
+    path(r'partitions/import/', views.PartitionBulkImportView.as_view(), name='partition_import'),
+    path(r'partitions/edit/', views.PartitionBulkEditView.as_view(), name='partition_bulk_edit'),
+    path(r'partitions/delete/', views.PartitionBulkDeleteView.as_view(), name='partition_bulk_delete'),
+    path(r'partitions/<int:pk>/', views.PartitionView.as_view(), name='partitions'),
+    path(r'partitions/<int:pk>/edit/', views.PartitionEditView.as_view(), name='partition_edit'),
+    path(r'partitions/<int:pk>/delete/', views.PartitionDeleteView.as_view(), name='partition_delete'),
+    path(r'partitions/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name='partition_changelog', kwargs={'model': Partition}),
 ]

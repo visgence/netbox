@@ -131,7 +131,6 @@ def example_choices(field, arg=3):
     Returns a number (default: 3) of example choices for a ChoiceFiled (useful for CSV import forms).
     """
     examples = []
-    print(field)
     if hasattr(field, 'queryset'):
         choices = [
             (obj.pk, getattr(obj, field.to_field_name)) for obj in field.queryset[:arg + 1]

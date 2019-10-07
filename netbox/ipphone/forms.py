@@ -11,38 +11,38 @@ from utilities.forms import (
     StaticSelect2, StaticSelect2Multiple, BOOLEAN_WITH_BLANK_CHOICES
 )
 from virtualization.models import VirtualMachine
-from .constants import PHONE_STATUS_CHOICES
-from .models import Phone, IPPhonePartition
+from .constants import EXTENSION_STATUS_CHOICES
+from .models import Extension, Partition
 
 
 #
-# IPPhonePartitions
+# Partitions
 #
 
-class IPPhonePartitionForm(BootstrapMixin, CustomFieldForm):
+class PartitionForm(BootstrapMixin, CustomFieldForm):
     tags = TagField(
         required=False
     )
 
     class Meta:
-        model = IPPhonePartition
+        model = Partition
         fields = [
             'name', 'enforce_unique', 'description', 'tags',
         ]
 
 
-class IPPhonePartitionCSVForm(forms.ModelForm):
+class PartitionCSVForm(forms.ModelForm):
     class Meta:
-        model = IPPhonePartition
-        fields = IPPhonePartition.csv_headers
+        model = Partition
+        fields = Partition.csv_headers
         help_texts = {
-            'name': 'IP Phone Partition name',
+            'name': 'Partition name',
         }
 
 
-class IPPhonePartitionBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFieldBulkEditForm):
+class PartitionBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFieldBulkEditForm):
     pk = forms.ModelMultipleChoiceField(
-        queryset=IPPhonePartition.objects.all(),
+        queryset=Partition.objects.all(),
         widget=forms.MultipleHiddenInput()
     )
     enforce_unique = forms.NullBooleanField(
@@ -60,8 +60,8 @@ class IPPhonePartitionBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFiel
         ]
 
 
-class IPPhonePartitionFilterForm(BootstrapMixin, CustomFieldFilterForm):
-    model = IPPhonePartition
+class PartitionFilterForm(BootstrapMixin, CustomFieldFilterForm):
+    model = Partition
     field_order = ['q']
     q = forms.CharField(
         required=False,
@@ -70,10 +70,10 @@ class IPPhonePartitionFilterForm(BootstrapMixin, CustomFieldFilterForm):
 
 
 #
-# Phone
+# Extension
 #
 
-class PhoneForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
+class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
     interface = forms.ModelChoiceField(
         queryset=Interface.objects.all(),
         required=False
@@ -100,20 +100,20 @@ class PhoneForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
             api_url='/api/dcim/devices/',
             display_field='display_name',
             filter_for={
-                'phone_number': 'device_id'
+                'dn': 'device_id'
             }
         )
     )
-    # phone_number = ChainedModelChoiceField(
-    #     queryset=Phone.objects.all(),
+    # dn = ChainedModelChoiceField(
+    #     queryset=Extension.objects.all(),
     #     chains=(
     #         ('interface__device', 'device'),
     #     ),
     #     required=False,
-    #     label='Phone Number',
+    #     label='Extension',
     #     widget=APISelect(
-    #         api_url='/api/ipphone/phones/',
-    #         display_field='phone_number'
+    #         api_url='/api/ipphone/extensions/',
+    #         display_field='dn'
     #     )
     # )
     tags = TagField(
@@ -121,9 +121,9 @@ class PhoneForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
     )
 
     class Meta:
-        model = Phone
+        model = Extension
         fields = [
-            'phone_number', 'ipphonepartition', 'status', 'description', 'interface', 'site', 'tags',
+            'dn', 'partition', 'status', 'description', 'interface', 'site', 'tags',
         ]
         widgets = {
             'status': StaticSelect2()
@@ -134,10 +134,10 @@ class PhoneForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
         # Initialize helper selectors
         instance = kwargs.get('instance')
         initial = kwargs.get('initial', {}).copy()
-        if instance and instance.phone_number is not None:
-            initial['phone_number'] = instance.phone_number
+        if instance and instance.dn is not None:
+            initial['dn'] = instance.dn
         else:
-            initial['phone_number'] = ''
+            initial['dn'] = ''
         kwargs['initial'] = initial
 
         super().__init__(*args, **kwargs)
@@ -156,32 +156,32 @@ class PhoneForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
 
     def save(self, *args, **kwargs):
 
-        phone = super().save(*args, **kwargs)
+        extension = super().save(*args, **kwargs)
 
-        # Assign/clear this Phone Number as the primary for the associated Device.
+        # Assign/clear this Extension as the primary for the associated Device.
         # parent = self.cleaned_data['interface'].parent
-        phone.save()
+        extension.save()
 
-        return phone
+        return extension
 
 
-class PhoneBulkCreateForm(BootstrapMixin, forms.Form):
-    # pattern = ExpandablePhoneField(
-    #     label='Phone pattern'
+class ExtensionBulkCreateForm(BootstrapMixin, forms.Form):
+    # pattern = ExpandableExtensionField(
+    #     label='Extension pattern'
     # )
     pattern = ''
 
 
-class PhoneBulkAddForm(BootstrapMixin, CustomFieldForm):
+class ExtensionBulkAddForm(BootstrapMixin, CustomFieldForm):
 
     class Meta:
-        model = Phone
+        model = Extension
         fields = [
-            'phone_number', 'ipphonepartition', 'status', 'description'
+            'dn', 'partition', 'status', 'description'
         ]
         widgets = {
-            'ipphonepartition': APISelect(
-                api_url="/api/ipphone/ipphonepartitions/"
+            'partition': APISelect(
+                api_url="/api/ipphone/partitions/"
             )
         }
 
@@ -189,10 +189,10 @@ class PhoneBulkAddForm(BootstrapMixin, CustomFieldForm):
         super().__init__(*args, **kwargs)
 
 
-class PhoneCSVForm(forms.ModelForm):
+class ExtensionCSVForm(forms.ModelForm):
 
     status = CSVChoiceField(
-        choices=PHONE_STATUS_CHOICES,
+        choices=EXTENSION_STATUS_CHOICES,
         help_text='Operational status'
     )
     device = FlexibleModelChoiceField(
@@ -208,20 +208,20 @@ class PhoneCSVForm(forms.ModelForm):
         help_text='Name of assigned interface',
         required=False
     )
-    ipphonepartition = FlexibleModelChoiceField(
-        queryset=IPPhonePartition.objects.all(),
+    partition = FlexibleModelChoiceField(
+        queryset=Partition.objects.all(),
         to_field_name='name',
         required=False,
-        help_text='Parent IP Phone Partition (or {ID})',
+        help_text='Parent Partition (or {ID})',
         error_messages={
-            'invalid_choice': 'IP Phone Partition not found.',
+            'invalid_choice': 'Partition not found.',
         }
     )
 
 
     class Meta:
-        model = Phone
-        fields = Phone.csv_headers
+        model = Extension
+        fields = Extension.csv_headers
 
     def clean(self):
         super().clean()
@@ -253,21 +253,21 @@ class PhoneCSVForm(forms.ModelForm):
                 name=self.cleaned_data['interface_name']
             )
 
-        phone_number = super().save(*args, **kwargs)
-        phone_number.save()
+        dn = super().save(*args, **kwargs)
+        dn.save()
         # parent = self.cleaned_data['device']
         # parent.save()
 
-        return phone_number
+        return dn
 
 
-class PhoneBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFieldBulkEditForm):
+class ExtensionBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFieldBulkEditForm):
     pk = forms.ModelMultipleChoiceField(
-        queryset=Phone.objects.all(),
+        queryset=Extension.objects.all(),
         widget=forms.MultipleHiddenInput()
     )
     status = forms.ChoiceField(
-        choices=add_blank_choice(PHONE_STATUS_CHOICES),
+        choices=add_blank_choice(EXTENSION_STATUS_CHOICES),
         required=False,
         widget=StaticSelect2()
     )
@@ -282,16 +282,16 @@ class PhoneBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFieldBulkEditFo
         ]
 
 
-class PhoneAssignForm(BootstrapMixin, forms.Form):
-    phone_number = forms.CharField(
-        label='Phone Number'
+class ExtensionAssignForm(BootstrapMixin, forms.Form):
+    dn = forms.CharField(
+        label='DN'
     )
 
 
-class PhoneFilterForm(BootstrapMixin, CustomFieldFilterForm):
-    model = Phone
+class ExtensionFilterForm(BootstrapMixin, CustomFieldFilterForm):
+    model = Extension
     field_order = [
-        'q', 'parent', 'ipphonepartition', 'status'
+        'q', 'parent', 'partition', 'status'
     ]
     q = forms.CharField(
         required=False,
@@ -307,7 +307,7 @@ class PhoneFilterForm(BootstrapMixin, CustomFieldFilterForm):
     #     label='Parent Prefix'
     # )
     status = forms.MultipleChoiceField(
-        choices=PHONE_STATUS_CHOICES,
+        choices=EXTENSION_STATUS_CHOICES,
         required=False,
         widget=StaticSelect2Multiple()
     )

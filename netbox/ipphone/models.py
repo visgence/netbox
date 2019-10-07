@@ -16,36 +16,36 @@ from utilities.utils import serialize_object
 from .constants import *
 
 
-class PhoneManager(models.Manager):
+class ExtensionManager(models.Manager):
 
     def search(self):
-        return Phone.objects.all()
+        return Extension.objects.all()
 
 
-class Phone(ChangeLoggedModel, CustomFieldModel):
+class Extension(ChangeLoggedModel, CustomFieldModel):
 
-    phone_number = models.CharField(
+    dn = models.CharField(
         max_length=25,
-        help_text='Phone number 555-555-5555'
+        help_text='Extension'
     )
-    ipphonepartition = models.ForeignKey(
-        to='ipphone.IPPhonePartition',
+    partition = models.ForeignKey(
+        to='ipphone.Partition',
         on_delete=models.PROTECT,
         # related_name='',
         blank=True,
         null=True,
-        verbose_name='IP Phone Partition'
+        verbose_name='Partition'
     )
     status = models.PositiveSmallIntegerField(
-        choices=PHONE_STATUS_CHOICES,
-        default=PHONE_STATUS_ACTIVE,
+        choices=EXTENSION_STATUS_CHOICES,
+        default=EXTENSION_STATUS_ACTIVE,
         verbose_name='Status',
-        help_text='The operational status of this Phone Number'
+        help_text='The operational status of this DN'
     )
     interface = models.ForeignKey(
         to='dcim.Interface',
         on_delete=models.CASCADE,
-        related_name='phone',
+        related_name='extension',
         blank=True,
         null=True
     )
@@ -59,38 +59,38 @@ class Phone(ChangeLoggedModel, CustomFieldModel):
         object_id_field='obj_id'
     )
 
-    objects = PhoneManager()
+    objects = ExtensionManager()
     tags = TaggableManager(through=TaggedItem)
 
     csv_headers = [
-        'phone_number', 'ipphonepartition', 'status', 'device', 'interface_name', 'description',
+        'dn', 'partition', 'status', 'device', 'interface_name', 'description',
     ]
 
     class Meta:
-        ordering = ['id', 'phone_number', 'ipphonepartition']
-        verbose_name = 'Phone Number'
-        verbose_name_plural = 'Phone Numbers'
+        ordering = ['id', 'dn', 'partition']
+        verbose_name = 'DN'
+        verbose_name_plural = 'DNs'
 
     def __str__(self):
-        return str(self.phone_number)
+        return str(self.dn)
 
     def get_absolute_url(self):
-        return reverse('ipphone:phone', args=[self.pk])
+        return reverse('ipphone:extension', args=[self.pk])
 
     def get_duplicates(self):
-        return Phone.objects.filter(phone_number=self.phone_number).exclude(pk=self.pk)
+        return Extension.objects.filter(dn=self.dn).exclude(pk=self.pk)
 
     def clean(self):
 
-        if self.phone_number:
+        if self.dn:
 
-            # Enforce unique Phone (if applicable)
-            if self.ipphonepartition and self.ipphonepartition.enforce_unique:
+            # Enforce unique DN (if applicable)
+            if self.partition and self.partition.enforce_unique:
                 duplicate_pns = self.get_duplicates()
                 if duplicate_pns:
                     raise ValidationError({
-                        'phone_number': "Duplicate Phone Number found in {}: {}".format(
-                            "IP Phone Partition {}".format(self.ipphonepartition) if self.ipphonepartition else "global table",
+                        'dn': "Duplicate DN found in {}: {}".format(
+                            "Partition {}".format(self.partition) if self.partition else "global table",
                             duplicate_pns.first(),
                         )
                     })
@@ -115,12 +115,12 @@ class Phone(ChangeLoggedModel, CustomFieldModel):
 
     def to_csv(self):
         return (
-            self.phone_number,
+            self.dn,
             self.get_status_display(),
             self.device.identifier if self.device else None,
             self.interface.name if self.interface else None,
             self.description,
-            self.ipphonepartition,
+            self.partition,
         )
 
     @property
@@ -133,20 +133,20 @@ class Phone(ChangeLoggedModel, CustomFieldModel):
         return STATUS_CHOICE_CLASSES[self.status]
 
 
-class IPPhonePartitionManager(models.Manager):
+class PartitionManager(models.Manager):
 
     def search(self):
-        return IPPhonePartition.objects.all()
+        return Partition.objects.all()
 
 
-class IPPhonePartition(ChangeLoggedModel, CustomFieldModel):
+class Partition(ChangeLoggedModel, CustomFieldModel):
     name = models.CharField(
         max_length=50
     )
     enforce_unique = models.BooleanField(
         default=True,
         verbose_name='Enforce unique space',
-        help_text='Prevent duplicate extensions within this IP Phone Partition'
+        help_text='Prevent duplicate dns within this Partition'
     )
     description = models.CharField(
         max_length=100,
@@ -164,14 +164,14 @@ class IPPhonePartition(ChangeLoggedModel, CustomFieldModel):
 
     class Meta:
         ordering = ['name']
-        verbose_name = 'IP Phone Partition'
-        verbose_name_plural = 'IP Phone Partitions'
+        verbose_name = 'Partition'
+        verbose_name_plural = 'Partitions'
 
     def __str__(self):
         return self.display_name or super().__str__()
 
     def get_absolute_url(self):
-        return reverse('ipphone:ipphonepartitions', args=[self.pk])
+        return reverse('ipphone:partitions', args=[self.pk])
 
     def to_csv(self):
         return (

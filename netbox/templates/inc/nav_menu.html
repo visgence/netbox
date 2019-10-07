@@ -296,23 +296,23 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">IP Phone <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li class="dropdown-header">IP Phone</li>
-                        <li{% if not perms.ipphone.view_phone %} class="disabled"{% endif %}>
-                            {% if perms.ipphone.add_phone %}
+                        <li{% if not perms.ipphone.view_extension %} class="disabled"{% endif %}>
+                            {% if perms.ipphone.add_extension %}
                                 <div class="buttons pull-right">
-                                    <a href="{% url 'ipphone:phone_add' %}" class="btn btn-xs btn-success" title="Add"><i class="fa fa-plus"></i></a>
-                                    <a href="{% url 'ipphone:phone_import' %}" class="btn btn-xs btn-info" title="Import"><i class="fa fa-download"></i></a>
+                                    <a href="{% url 'ipphone:extension_add' %}" class="btn btn-xs btn-success" title="Add"><i class="fa fa-plus"></i></a>
+                                    <a href="{% url 'ipphone:extension_import' %}" class="btn btn-xs btn-info" title="Import"><i class="fa fa-download"></i></a>
                                 </div>
                             {% endif %}
-                            <a href="{% url 'ipphone:phone_list' %}">Phone Numbers</a>
+                            <a href="{% url 'ipphone:extension_list' %}">Extensions</a>
                         </li>
-                        <li{% if not perms.ipphone.view_ipphonepartition %} class="disabled"{% endif %}>
-                            {% if perms.ipphone.add_ipphonepartition %}
+                        <li{% if not perms.ipphone.view_partition %} class="disabled"{% endif %}>
+                            {% if perms.ipphone.add_partition %}
                                 <div class="buttons pull-right">
-                                    <a href="{% url 'ipphone:ipphonepartition_add' %}" class="btn btn-xs btn-success" title="Add"><i class="fa fa-plus"></i></a>
-                                    <a href="{% url 'ipphone:ipphonepartition_import' %}" class="btn btn-xs btn-info" title="Import"><i class="fa fa-download"></i></a>
+                                    <a href="{% url 'ipphone:partition_add' %}" class="btn btn-xs btn-success" title="Add"><i class="fa fa-plus"></i></a>
+                                    <a href="{% url 'ipphone:partition_import' %}" class="btn btn-xs btn-info" title="Import"><i class="fa fa-download"></i></a>
                                 </div>
                             {% endif %}
-                            <a href="{% url 'ipphone:ipphonepartition_list' %}">IP Phone Partitions</a>
+                            <a href="{% url 'ipphone:partition_list' %}">Partitions</a>
                         </li>
                         <li class="divider"></li>
                     </ul>

@@ -4,31 +4,31 @@ from django_tables2.utils import Accessor
 from dcim.models import Interface
 from tenancy.tables import COL_TENANT
 from utilities.tables import BaseTable, BooleanColumn, ToggleColumn
-from .models import Phone, IPPhonePartition
+from .models import Extension, Partition
 
-IPPHONEPARTITION_LINK = """
-{% if record.ipphonepartition %}
-    <a href="{{ record.ipphonepartition.get_absolute_url }}">{{ record.ipphonepartition }}</a>
+PARTITION_LINK = """
+{% if record.partition %}
+    <a href="{{ record.partition.get_absolute_url }}">{{ record.partition }}</a>
 {% else %}
     Global
 {% endif %}
 """
 
-PHONE_LINK = """
+EXTENSION_LINK = """
 {% if record.pk %}
-    <a href="{{ record.get_absolute_url }}">{{ record.phone_number }}</a>
-{% elif perms.ipphone.add_phone %}
-    <a href="{% url 'ipphone:phone_add' %}?phone_number={{ record.1 }}" class="btn btn-xs btn-success">{% if record.0 <= 65536 %}{{ record.0 }}{% else %}Many{% endif %} IP{{ record.0|pluralize }} available</a>
+    <a href="{{ record.get_absolute_url }}">{{ record.dn }}</a>
+{% elif perms.ipphone.add_extension %}
+    <a href="{% url 'ipphone:extension_add' %}?dn={{ record.1 }}" class="btn btn-xs btn-success">{% if record.0 <= 65536 %}{{ record.0 }}{% else %}Many{% endif %} IP{{ record.0|pluralize }} available</a>
 {% else %}
     {% if record.0 <= 65536 %}{{ record.0 }}{% else %}Many{% endif %} PN{{ record.0|pluralize }} available
 {% endif %}
 """
 
-PHONE_ASSIGN_LINK = """
-<a href="{% url 'ipphone:phone_edit' pk=record.pk %}?interface={{ request.GET.interface }}&return_url={{ request.GET.return_url }}">{{ record }}</a>
+EXTENSION_ASSIGN_LINK = """
+<a href="{% url 'ipphone:extension_edit' pk=record.pk %}?interface={{ request.GET.interface }}&return_url={{ request.GET.return_url }}">{{ record }}</a>
 """
 
-PHONE_PARENT = """
+EXTENSION_PARENT = """
 {% if record.interface %}
     <a href="{{ record.interface.parent.get_absolute_url }}">{{ record.interface.parent }}</a>
 {% else %}
@@ -45,64 +45,64 @@ STATUS_LABEL = """
 """
 
 #
-# Phones
+# Extensions
 #
 
-class PhoneTable(BaseTable):
+class ExtensionTable(BaseTable):
     pk = ToggleColumn()
-    phone_number = tables.TemplateColumn(PHONE_LINK, verbose_name='Phone Number')
-    ipphonepartition = tables.TemplateColumn(IPPHONEPARTITION_LINK, verbose_name='IP Phone Partition')
+    dn = tables.TemplateColumn(EXTENSION_LINK, verbose_name='DN')
+    partition = tables.TemplateColumn(PARTITION_LINK, verbose_name='Partition')
     status = tables.TemplateColumn(STATUS_LABEL)
-    parent = tables.TemplateColumn(PHONE_PARENT, orderable=False)
+    parent = tables.TemplateColumn(EXTENSION_PARENT, orderable=False)
     interface = tables.Column(orderable=False)
 
     class Meta(BaseTable.Meta):
-        model = Phone
+        model = Extension
         fields = (
-            'pk', 'phone_number', 'ipphonepartition', 'status', 'parent', 'interface', 'description',
+            'pk', 'dn', 'partition', 'status', 'parent', 'interface', 'description',
         )
 
 
-class PhoneDetailTable(PhoneTable):
-    class Meta(PhoneTable.Meta):
+class ExtensionDetailTable(ExtensionTable):
+    class Meta(ExtensionTable.Meta):
         fields = (
-            'pk', 'phone_number', 'ipphonepartition', 'status', 'parent', 'interface', 'description',
+            'pk', 'dn', 'partition', 'status', 'parent', 'interface', 'description',
         )
 
 
-class PhoneAssignTable(BaseTable):
-    phone_number = tables.TemplateColumn(PHONE_ASSIGN_LINK, verbose_name='Phone Number')
+class ExtensionAssignTable(BaseTable):
+    dn = tables.TemplateColumn(EXTENSION_ASSIGN_LINK, verbose_name='DN')
     status = tables.TemplateColumn(STATUS_LABEL)
-    parent = tables.TemplateColumn(PHONE_PARENT, orderable=False)
+    parent = tables.TemplateColumn(EXTENSION_PARENT, orderable=False)
     interface = tables.Column(orderable=False)
 
     class Meta(BaseTable.Meta):
-        model = Phone
-        fields = ('phone_number', 'ipphonepartition', 'status', 'parent', 'interface', 'description')
+        model = Extension
+        fields = ('dn', 'partition', 'status', 'parent', 'interface', 'description')
         orderable = False
 
 
-class InterfacePhoneTable(BaseTable):
+class InterfaceExtensionTable(BaseTable):
     """
-    List Phone Number assigned to a specific Interface.
+    List Extension assigned to a specific Interface.
     """
-    phone_number = tables.TemplateColumn(PHONE_ASSIGN_LINK, verbose_name='Phone Number')
+    dn = tables.TemplateColumn(EXTENSION_ASSIGN_LINK, verbose_name='DN')
     status = tables.TemplateColumn(STATUS_LABEL)
 
     class Meta(BaseTable.Meta):
-        model = Phone
-        fields = ('phone_number', 'ipphonepartition', 'status', 'description')
+        model = Extension
+        fields = ('dn', 'partition', 'status', 'description')
 
 
 #
-# IPPhonePartitions
+# Partitions
 #
 
-class IPPhonePartitionTable(BaseTable):
+class PartitionTable(BaseTable):
     pk = ToggleColumn()
     name = tables.LinkColumn()
 
     class Meta(BaseTable.Meta):
-        model = IPPhonePartition
+        model = Partition
         fields = ('pk', 'name', 'description', 'enforce_unique')
 

@@ -3,16 +3,16 @@
 
 {% block content %}
 <div class="pull-right noprint">
-    {% if perms.ipphone.add_phone %}
-        {% add_button 'ipphone:phone_add' %}
-        {% import_button 'ipphone:phone_import' %}
+    {% if perms.ipphone.add_partition %}
+        {% add_button 'ipphone:partition_add' %}
+        {% import_button 'ipphone:partition_import' %}
     {% endif %}
     {% export_button content_type %}
 </div>
-<h1>{% block title %}Phone Numbers{% endblock %}</h1>
+<h1>{% block title %}Partitions{% endblock %}</h1>
 <div class="row">
 	<div class="col-md-9">
-        {% include 'utilities/obj_table.html' with bulk_edit_url='ipphone:phone_bulk_edit' bulk_delete_url='ipphone:phone_bulk_delete' %}
+        {% include 'utilities/obj_table.html' with bulk_edit_url='ipphone:partition_bulk_edit' bulk_delete_url='ipphone:partition_bulk_delete' %}
 	</div>
 	<div class="col-md-3 noprint">
 		{% include 'inc/search_panel.html' %}

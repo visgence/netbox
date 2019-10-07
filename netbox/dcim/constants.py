@@ -138,7 +138,7 @@ IFACE_TYPE_SUMMITSTACK512 = 5330
 
 # Other
 IFACE_TYPE_OTHER = 32767
-IFACE_TYPE_PHONE = 32700
+IFACE_TYPE_EXTENSION = 32700
 
 IFACE_TYPE_CHOICES = [
     [
@@ -250,7 +250,7 @@ IFACE_TYPE_CHOICES = [
         'Other',
         [
             [IFACE_TYPE_OTHER, 'Other'],
-            [IFACE_TYPE_PHONE, 'Phone'],
+            [IFACE_TYPE_EXTENSION, 'Extension'],
         ]
     ],
 ]

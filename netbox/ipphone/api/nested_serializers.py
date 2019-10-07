@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
-from ipphone.models import Phone
+from ipphone.models import Extension
 from utilities.api import WritableNestedSerializer
 
 __all__ = [
-    'NestedPhoneSerializer',
+    'NestedExtensionSerializer',
     # 'NestedVRFSerializer',
 ]
 
@@ -27,9 +27,9 @@ __all__ = [
 #
 
 
-class NestedPhoneSerializer(WritableNestedSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='ipphone-api:phone-detail')
+class NestedExtensionSerializer(WritableNestedSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='ipphone-api:extension-detail')
 
     class Meta:
-        model = Phone
-        fields = ['id', 'ipphonepartition', 'phone_number']
+        model = Extension
+        fields = ['id', 'partition', 'dn']

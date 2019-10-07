@@ -5,16 +5,16 @@
 
 {% block tabs %}
     {% if not obj.pk %}
-        {% include 'ipphone/inc/phone_edit_header.html' with active_tab='add' %}
+        {% include 'ipphone/inc/extension_edit_header.html' with active_tab='add' %}
     {% endif %}
 {% endblock %}
 
 {% block form %}
     <div class="panel panel-default">
-        <div class="panel-heading"><strong>Phone Number</strong></div>
+        <div class="panel-heading"><strong>Extension</strong></div>
         <div class="panel-body">
-            {% render_field form.phone_number %}
-            {% render_field form.ipphonepartition %}
+            {% render_field form.dn %}
+            {% render_field form.partition %}
             {% render_field form.status %}
             {% render_field form.description %}
         </div>

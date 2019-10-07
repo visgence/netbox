@@ -13,134 +13,135 @@ from utilities.views import (
 from virtualization.models import VirtualMachine
 from . import filters, forms, tables
 from .constants import *
-from .models import Phone, IPPhonePartition
+from .models import Extension, Partition
 
 
 #
-# IPPhonePartitions
+# Partitions
 #
 
-class IPPhonePartitionListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'ipphone.view_ipphonepartition'
-    queryset = IPPhonePartition.objects.all() # prefetch_related('tenant')
-    filter = filters.IPPhonePartitionFilter
-    filter_form = forms.IPPhonePartitionFilterForm
-    table = tables.IPPhonePartitionTable
-    template_name = 'ipphone/ipphonepartition_list.html'
+class PartitionListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'ipphone.view_partition'
+    queryset = Partition.objects.all() # prefetch_related('tenant')
+    filter = filters.PartitionFilter
+    filter_form = forms.PartitionFilterForm
+    table = tables.PartitionTable
+    template_name = 'ipphone/partition_list.html'
 
 
-class IPPhonePartitionView(PermissionRequiredMixin, View):
-    permission_required = 'ipphone.view_ipphonepartition'
+class PartitionView(PermissionRequiredMixin, View):
+    permission_required = 'ipphone.view_partition'
 
     def get(self, request, pk):
 
-        ipphonepartition = get_object_or_404(IPPhonePartition.objects.all(), pk=pk)
+        partition = get_object_or_404(Partition.objects.all(), pk=pk)
 
-        return render(request, 'ipphone/ipphonepartition.html', {
-            'ipphonepartition': ipphonepartition
+        return render(request, 'ipphone/partition.html', {
+            'partition': partition
         })
 
 
-class IPPhonePartitionCreateView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'ipphone.add_ipphonepartition'
-    model = IPPhonePartition
-    model_form = forms.IPPhonePartitionForm
-    template_name = 'ipphone/ipphonepartition_edit.html'
-    default_return_url = 'ipphone:ipphonepartition_list'
+class PartitionCreateView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'ipphone.add_partition'
+    model = Partition
+    model_form = forms.PartitionForm
+    template_name = 'ipphone/partition_edit.html'
+    default_return_url = 'ipphone:partition_list'
 
 
-class IPPhonePartitionEditView(IPPhonePartitionCreateView):
-    permission_required = 'ipphone.change_ipphonepartition'
+class PartitionEditView(PartitionCreateView):
+    permission_required = 'ipphone.change_partition'
 
 
-class IPPhonePartitionDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'ipphone.delete_ipphonepartition'
-    model = IPPhonePartition
-    default_return_url = 'ipphone:ipphonepartition_list'
+class PartitionDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'ipphone.delete_partition'
+    model = Partition
+    default_return_url = 'ipphone:partition_list'
 
 
-class IPPhonePartitionBulkImportView(PermissionRequiredMixin, BulkImportView):
-    permission_required = 'ipphone.add_ipphonepartition'
-    model_form = forms.IPPhonePartitionCSVForm
-    table = tables.IPPhonePartitionTable
-    default_return_url = 'ipphone:ipphonepartition_list'
+class PartitionBulkImportView(PermissionRequiredMixin, BulkImportView):
+    permission_required = 'ipphone.add_partition'
+    model_form = forms.PartitionCSVForm
+    table = tables.PartitionTable
+    default_return_url = 'ipphone:partition_list'
 
 
-class IPPhonePartitionBulkEditView(PermissionRequiredMixin, BulkEditView):
-    permission_required = 'ipphone.change_ipphonepartition'
-    filter = filters.IPPhonePartitionFilter
-    table = tables.IPPhonePartitionTable
-    form = forms.IPPhonePartitionBulkEditForm
-    default_return_url = 'ipphone:ipphonepartition_list'
+class PartitionBulkEditView(PermissionRequiredMixin, BulkEditView):
+    permission_required = 'ipphone.change_partition'
+    queryset = Partition.objects.all()
+    filter = filters.PartitionFilter
+    table = tables.PartitionTable
+    form = forms.PartitionBulkEditForm
+    default_return_url = 'ipphone:partition_list'
 
 
-class IPPhonePartitionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
-        permission_required = 'ipphone.delete_ipphonepartition'
-        queryset = IPPhonePartition.objects.all() # prefetch_related('')
-        filter = filters.IPPhonePartitionFilter
-        table = tables.IPPhonePartitionTable
-        default_return_url = 'ipphone:ipphonepartition_list'
+class PartitionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
+        permission_required = 'ipphone.delete_partition'
+        queryset = Partition.objects.all() # prefetch_related('')
+        filter = filters.PartitionFilter
+        table = tables.PartitionTable
+        default_return_url = 'ipphone:partition_list'
 
 
 #
-# Phone Numbers
+# Extensions
 #
 
-class PhoneListView(PermissionRequiredMixin, ObjectListView):
-    permission_required = 'ipphone.view_phone_number'
-    queryset = Phone.objects.prefetch_related(
+class ExtensionListView(PermissionRequiredMixin, ObjectListView):
+    permission_required = 'ipphone.view_dn'
+    queryset = Extension.objects.prefetch_related(
         'interface__device'
     )
-    filter = filters.PhoneFilter
-    filter_form = forms.PhoneForm
-    table = tables.PhoneDetailTable
-    template_name = 'ipphone/phone_list.html'
+    filter = filters.ExtensionFilter
+    filter_form = forms.ExtensionForm
+    table = tables.ExtensionDetailTable
+    template_name = 'ipphone/extension_list.html'
 
 
-class PhoneView(PermissionRequiredMixin, View):
-    permission_required = 'ipphone.view_phone'
+class ExtensionView(PermissionRequiredMixin, View):
+    permission_required = 'ipphone.view_extension'
 
     def get(self, request, pk):
 
-        phone = get_object_or_404(Phone.objects.prefetch_related('interface__device'), pk=pk)
+        extension = get_object_or_404(Extension.objects.prefetch_related('interface__device'), pk=pk)
 
         # # TBD 
 
-        # # Duplicate Phone Numbers table
-        # # duplicate_pns = Phone.objects.filter(
-        # #     phone_number=str(phone.phone_number)
+        # # Duplicate s table
+        # # duplicate_pns = Extension.objects.filter(
+        # #     dn=str(extension.dn)
         # # ).exclude(
-        # #     pk=phone.pk
+        # #     pk=extension.pk
         # # ).prefetch_related(
         # #     'interface__device'
         # # )
         # duplicate_pns = []
 
-        # duplicate_pns_table = tables.PhoneTable(list(duplicate_pns), orderable=False)
+        # duplicate_pns_table = tables.ExtensionTable(list(duplicate_pns), orderable=False)
 
         # related_pns = []
 
-        # # related_pns = Phone.objects.prefetch_related(
+        # # related_pns = Extension.objects.prefetch_related(
         # #     'interface__device'
         # # ).exclude(
-        # #     phone_number=str(phone.phone_number)
+        # #     dn=str(extension.dn)
         # # )
 
-        # related_pns_table = tables.PhoneTable(list(related_pns), orderable=False)
+        # related_pns_table = tables.ExtensionTable(list(related_pns), orderable=False)
 
-        return render(request, 'ipphone/phone.html', {
-            'phone': phone,
+        return render(request, 'ipphone/extension.html', {
+            'extension': extension,
             # 'duplicate_pns_table': duplicate_pns_table,
             # 'related_pns_table': related_pns_table,
         })
 
 
-class PhoneCreateView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'ipphone.add_phone'
-    model = Phone
-    model_form = forms.PhoneForm
-    template_name = 'ipphone/phone_edit.html'
-    default_return_url = 'ipphone:phone_list'
+class ExtensionCreateView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'ipphone.add_extension'
+    model = Extension
+    model_form = forms.ExtensionForm
+    template_name = 'ipphone/extension_edit.html'
+    default_return_url = 'ipphone:extension_list'
 
     def alter_obj(self, obj, request, url_args, url_kwargs):
 
@@ -154,91 +155,91 @@ class PhoneCreateView(PermissionRequiredMixin, ObjectEditView):
         return obj
 
 
-class PhoneEditView(PhoneCreateView):
-    permission_required = 'ipphone.change_phone'
+class ExtensionEditView(ExtensionCreateView):
+    permission_required = 'ipphone.change_extension'
 
 
-class PhoneAssignView(PermissionRequiredMixin, View):
+class ExtensionAssignView(PermissionRequiredMixin, View):
     """
-    Search for Phone Numbers to be assigned to an Interface.
+    Search for Extension Numbers to be assigned to an Interface.
     """
-    permission_required = 'ipphone.change_phone'
+    permission_required = 'ipphone.change_extension'
 
     def dispatch(self, request, *args, **kwargs):
 
         # Redirect user if an interface has not been provided
         if 'interface' not in request.GET:
-            return redirect('ipphone:phone_add')
+            return redirect('ipphone:extension_add')
 
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
 
-        form = forms.PhoneAssignForm()
+        form = forms.ExtensionAssignForm()
 
-        return render(request, 'ipphone/phone_assign.html', {
+        return render(request, 'ipphone/extension_assign.html', {
             'form': form,
             'return_url': request.GET.get('return_url', ''),
         })
 
     def post(self, request):
 
-        form = forms.PhoneAssignForm(request.POST)
+        form = forms.ExtensionAssignForm(request.POST)
         table = None
 
         if form.is_valid():
 
-            queryset = Phone.objects.prefetch_related(
+            queryset = Extension.objects.prefetch_related(
                 'interface__device'
             ).filter(
-                phone_number__istartswith=form.cleaned_data['phone_number'],
+                dn__istartswith=form.cleaned_data['dn'],
             )[:100]  # Limit to 100 results
-            table = tables.PhoneAssignTable(queryset)
+            table = tables.ExtensionAssignTable(queryset)
 
-        return render(request, 'ipphone/phone_assign.html', {
+        return render(request, 'ipphone/extension_assign.html', {
             'form': form,
             'table': table,
             'return_url': request.GET.get('return_url', ''),
         })
 
 
-class PhoneDeleteView(PermissionRequiredMixin, ObjectDeleteView):
-    permission_required = 'ipphone.delete_phone'
-    model = Phone
-    default_return_url = 'ipphone:phone_list'
+class ExtensionDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'ipphone.delete_extension'
+    model = Extension
+    default_return_url = 'ipphone:extension_list'
 
 
-class PhoneBulkCreateView(PermissionRequiredMixin, BulkCreateView):
-    permission_required = 'ipphone.add_phone'
-    form = forms.PhoneBulkCreateForm
-    model_form = forms.PhoneBulkAddForm
-    pattern_target = 'phone_number'
-    template_name = 'ipphone/phone_bulk_add.html'
-    default_return_url = 'ipphone:phone_list'
+class ExtensionBulkCreateView(PermissionRequiredMixin, BulkCreateView):
+    permission_required = 'ipphone.add_extension'
+    form = forms.ExtensionBulkCreateForm
+    model_form = forms.ExtensionBulkAddForm
+    pattern_target = 'dn'
+    template_name = 'ipphone/extension_bulk_add.html'
+    default_return_url = 'ipphone:extension_list'
 
 
-class PhoneBulkImportView(PermissionRequiredMixin, BulkImportView):
-    permission_required = 'ipphone.add_phone'
-    # queryset = Phone.objects.all()
-    model_form = forms.PhoneCSVForm
-    table = tables.PhoneTable
-    default_return_url = 'ipphone:phone_list'
+class ExtensionBulkImportView(PermissionRequiredMixin, BulkImportView):
+    permission_required = 'ipphone.add_extension'
+    # queryset = Extension.objects.all()
+    model_form = forms.ExtensionCSVForm
+    table = tables.ExtensionTable
+    default_return_url = 'ipphone:extension_list'
 
 
-class PhoneBulkEditView(PermissionRequiredMixin, BulkEditView):
-    permission_required = 'ipphone.change_phone'
-    queryset = Phone.objects.prefetch_related('interface__device')
-    filter = filters.PhoneFilter
-    table = tables.PhoneTable
-    form = forms.PhoneBulkEditForm
-    default_return_url = 'ipphone:phone_list'
+class ExtensionBulkEditView(PermissionRequiredMixin, BulkEditView):
+    permission_required = 'ipphone.change_extension'
+    queryset = Extension.objects.prefetch_related('interface__device')
+    filter = filters.ExtensionFilter
+    table = tables.ExtensionTable
+    form = forms.ExtensionBulkEditForm
+    default_return_url = 'ipphone:extension_list'
 
 
-class PhoneBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
-    permission_required = 'ipphone.delete_phone'
-    queryset = Phone.objects.prefetch_related('interface__device')
-    filter = filters.PhoneFilter
-    table = tables.PhoneTable
-    default_return_url = 'ipphone:phone_list'
+class ExtensionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
+    permission_required = 'ipphone.delete_extension'
+    queryset = Extension.objects.prefetch_related('interface__device')
+    filter = filters.ExtensionFilter
+    table = tables.ExtensionTable
+    default_return_url = 'ipphone:extension_list'
 
 

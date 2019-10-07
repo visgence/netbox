@@ -2,15 +2,15 @@
 
 <ul class="nav nav-tabs" style="margin-bottom: 20px">
     <li role="presentation"{% if active_tab == 'add' %} class="active"{% endif %}>
-        <a href="{% url 'ipphone:phone_add' %}{% querystring request %}">New Number</a>
+        <a href="{% url 'ipphone:extension_add' %}{% querystring request %}">New Number</a>
     </li>
     {% if 'interface' in request.GET %}
         <li role="presentation"{% if active_tab == 'assign' %} class="active"{% endif %}>
-            <a href="{% url 'ipphone:phone_assign' %}{% querystring request %}">Assign Number</a>
+            <a href="{% url 'ipphone:extension_assign' %}{% querystring request %}">Assign Number</a>
         </li>
         {% else %}
             <li role="presentation"{% if active_tab == 'bulk_add' %} class="active"{% endif %}>
-                <a href="{% url 'ipphone:phone_bulk_add' %}{% querystring request %}">Bulk Create</a>
+                <a href="{% url 'ipphone:extension_bulk_add' %}{% querystring request %}">Bulk Create</a>
             </li>
     {% endif %}
 </ul>

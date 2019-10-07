@@ -147,8 +147,8 @@
                 <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
             </a>
         {% endif %}
-        {% if perms.ipphone.add_phone %}
-            <a href="{% url 'ipphone:phone_add' %}?interface={{ iface.pk }}&return_url={{ device.get_absolute_url }}" class="btn btn-xs btn-success" title="Add Phone Number">
+        {% if perms.ipphone.add_extension %}
+            <a href="{% url 'ipphone:extension_add' %}?interface={{ iface.pk }}&return_url={{ device.get_absolute_url }}" class="btn btn-xs btn-success" title="Add Extension">
                 <i class="glyphicon glyphicon-earphone" aria-hidden="true"></i>
             </a>
         {% endif %}
@@ -265,32 +265,32 @@
     {% endif %}
 {% endwith %}
 
-{% with phones=iface.phone.all %}
-    {% if phones %}
-        <tr class="phones">
+{% with extensions=iface.extension.all %}
+    {% if extensions %}
+        <tr class="extensions">
             {# Placeholder #}
             {% if perms.dcim.change_interface or perms.dcim.delete_interface %}
                 <td></td>
             {% endif %}
 
-            {# Phone Numbers table #}
+            {# Extension table #}
             <td colspan="9" style="padding: 0">
                 <table class="table table-condensed interface-ips">
                     <thead>
                         <tr class="text-muted">
-                            <th class="col-md-3">Phone</th>
+                            <th class="col-md-3">Extension</th>
                             <th class="col-md-2">Status</th>
                             <th class="col-md-3"></th>
                             <th class="col-md-3">Description</th>
                             <th class="col-md-1"></th>
                         </tr>
                     </thead>
-                    {% for ph in iface.phone.all %}
+                    {% for ph in iface.extension.all %}
                         <tr>
 
-                            {# Phone Number #}
+                            {# Extension #}
                             <td>
-                                <a href="{% url 'ipphone:phone' pk=ph.pk %}">{{ ph }}</a>
+                                <a href="{% url 'ipphone:extension' pk=ph.pk %}">{{ ph }}</a>
                             </td>
 
                             {# status #}
@@ -311,14 +311,14 @@
 
                             {# Buttons #}
                             <td class="text-right text-nowrap noprint">
-                                {% if perms.ipphone.change_phone %}
-                                    <a href="{% url 'ipphone:phone_edit' pk=ph.pk %}?return_url={{ device.get_absolute_url }}" class="btn btn-info btn-xs">
-                                        <i class="glyphicon glyphicon-pencil" aria-hidden="true" title="Edit Phone Number"></i>
+                                {% if perms.ipphone.change_extension %}
+                                    <a href="{% url 'ipphone:extension_edit' pk=ph.pk %}?return_url={{ device.get_absolute_url }}" class="btn btn-info btn-xs">
+                                        <i class="glyphicon glyphicon-pencil" aria-hidden="true" title="Edit Extension"></i>
                                     </a>
                                 {% endif %}
-                                {% if perms.ipphone.delete_phone %}
-                                    <a href="{% url 'ipphone:phone_delete' pk=ph.pk %}?return_url={{ device.get_absolute_url }}" class="btn btn-danger btn-xs">
-                                        <i class="glyphicon glyphicon-trash" aria-hidden="true" title="Delete Phone Number"></i>
+                                {% if perms.ipphone.delete_extension %}
+                                    <a href="{% url 'ipphone:extension_delete' pk=ph.pk %}?return_url={{ device.get_absolute_url }}" class="btn btn-danger btn-xs">
+                                        <i class="glyphicon glyphicon-trash" aria-hidden="true" title="Delete Extension"></i>
                                     </a>
                                 {% endif %}
                             </td>

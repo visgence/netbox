@@ -8,10 +8,10 @@ from dcim.models import Site, Device, Interface
 from extras.filters import CustomFieldFilterSet
 from tenancy.filtersets import TenancyFilterSet
 from utilities.filters import NameSlugSearchFilterSet, NumericInFilter, TagFilter
-from .constants import PHONE_STATUS_CHOICES
-from .models import Phone, IPPhonePartition
+from .constants import EXTENSION_STATUS_CHOICES
+from .models import Extension, Partition
 
-class PhoneFilter(CustomFieldFilterSet):
+class ExtensionFilter(CustomFieldFilterSet):
     id__in = NumericInFilter(
         field_name='id',
         lookup_expr='in'
@@ -24,13 +24,13 @@ class PhoneFilter(CustomFieldFilterSet):
         method='search_by_parent',
         label='Parent prefix',
     )
-    phone_number = django_filters.CharFilter(
-        method='filter_phone_number',
-        label='PhoneNumber',
+    dn = django_filters.CharFilter(
+        method='filter_dn',
+        label='Extension',
     )
-    ipphonepartition_id = django_filters.ModelMultipleChoiceFilter(
-        queryset=IPPhonePartition.objects.all(),
-        label='IPPhonePartition',
+    partition_id = django_filters.ModelMultipleChoiceFilter(
+        queryset=Partition.objects.all(),
+        label='Partition',
     )
     interface = django_filters.ModelMultipleChoiceFilter(
         field_name='interface__name',
@@ -43,21 +43,21 @@ class PhoneFilter(CustomFieldFilterSet):
         label='Interface (ID)',
     )
     status = django_filters.MultipleChoiceFilter(
-        choices=PHONE_STATUS_CHOICES,
+        choices=EXTENSION_STATUS_CHOICES,
         null_value=None
     )
     tag = TagFilter()
 
     class Meta:
-        model = Phone
-        fields = ['phone_number', 'ipphonepartition']
+        model = Extension
+        fields = ['dn', 'partition']
 
     def search(self, queryset, name, value):
         if not value.strip():
             return queryset
         qs_filter = (
             Q(description__icontains=value) |
-            Q(phone_number__istartswith=value)
+            Q(dn__istartswith=value)
         )
         return queryset.filter(qs_filter)
 
@@ -67,12 +67,20 @@ class PhoneFilter(CustomFieldFilterSet):
             return queryset
         try:
             query = str(value.strip())
-            return queryset.filter(phone_number_contained=query)
+            return queryset.filter(dn_contained=query)
         except (AddrFormatError, ValueError):
             return queryset.none()
 
+    def filter_dn(self, queryset, name, value):
+        if not value.strip():
+            return queryset
+        try:
+            return queryset.filter(dn=value)
+        except ValidationError:
+            return queryset.none()
 
-class IPPhonePartitionFilter(TenancyFilterSet, CustomFieldFilterSet):
+
+class PartitionFilter(TenancyFilterSet, CustomFieldFilterSet):
     id__in = NumericInFilter(
         field_name='id',
         lookup_expr='in'
@@ -92,5 +100,5 @@ class IPPhonePartitionFilter(TenancyFilterSet, CustomFieldFilterSet):
         )
 
     class Meta:
-        model = IPPhonePartition
+        model = Partition
         fields = ['name', 'enforce_unique']

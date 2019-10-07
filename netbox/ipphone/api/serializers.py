@@ -9,7 +9,7 @@ from dcim.api.nested_serializers import NestedDeviceSerializer, NestedSiteSerial
 from dcim.models import Interface
 from extras.api.customfields import CustomFieldModelSerializer
 from ipphone.constants import *
-from ipphone.models import Phone, IPPhonePartition
+from ipphone.models import Extension, Partition
 from utilities.api import (
     ChoiceField, SerializedPKRelatedField, ValidatedModelSerializer, WritableNestedSerializer,
 )
@@ -17,24 +17,24 @@ from virtualization.api.nested_serializers import NestedVirtualMachineSerializer
 from .nested_serializers import *
 
 #
-# IPPhonePartitions
+# Partitions
 #
 
-class IPPhonePartitionSerializer(TaggitSerializer, CustomFieldModelSerializer):
+class PartitionSerializer(TaggitSerializer, CustomFieldModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
-        model = IPPhonePartition
+        model = Partition
         fields = [
             'id', 'name', 'enforce_unique', 'description', 'tags', 'custom_fields',
         ]
 
 
 #
-# Phone Numbers
+# Extensions
 #
 
-class PhoneInterfaceSerializer(WritableNestedSerializer):
+class ExtensionInterfaceSerializer(WritableNestedSerializer):
     url = serializers.SerializerMethodField() 
     device = NestedDeviceSerializer(read_only=True)
 
@@ -49,14 +49,14 @@ class PhoneInterfaceSerializer(WritableNestedSerializer):
         return reverse(url_name, kwargs={'pk': obj.pk}, request=self.context['request'])
 
 
-class PhoneSerializer(TaggitSerializer, CustomFieldModelSerializer):
-    status = ChoiceField(choices=PHONE_STATUS_CHOICES, required=False)
-    interface = PhoneInterfaceSerializer(required=False, allow_null=True)
+class ExtensionSerializer(TaggitSerializer, CustomFieldModelSerializer):
+    status = ChoiceField(choices=EXTENSION_STATUS_CHOICES, required=False)
+    interface = ExtensionInterfaceSerializer(required=False, allow_null=True)
     tags = TagListSerializerField(required=False)
 
     class Meta:
-        model = Phone
+        model = Extension
         fields = [
-            'id', 'ipphonepartition', 'phone_number', 'status', 'interface', 'description', 'tags', 'custom_fields', 'created', 'last_updated',
+            'id', 'partition', 'dn', 'status', 'interface', 'description', 'tags', 'custom_fields', 'created', 'last_updated',
         ]
 

@@ -209,24 +209,24 @@
             </div>
             <div class="list-group">
                 <div class="list-group-item">
-                    {% if perms.ipphone.view_phones %}
-                        <span class="badge pull-right">{{ stats.phone_number_count }}</span>
-                        <h4 class="list-group-item-heading"><a href="{% url 'ipphone:phone_list' %}">Phone Numbers</a></h4>
+                    {% if perms.ipphone.view_extensions %}
+                        <span class="badge pull-right">{{ stats.extension_count }}</span>
+                        <h4 class="list-group-item-heading"><a href="{% url 'ipphone:extension_list' %}">Extension</a></h4>
                     {% else %}
                         <span class="badge pull-right"><i class="fa fa-lock"></i></span>
-                        <h4 class="list-group-item-heading">Phone Numbers</h4>
+                        <h4 class="list-group-item-heading">Extension</h4>
                     {% endif %}
-                    <p class="list-group-item-text text-muted">Individual Phone Numbers</p>
+                    <p class="list-group-item-text text-muted">Individual Extension</p>
                 </div>
                 <div class="list-group-item">
-                    {% if perms.ipphone.view_ipphonepartition %}
-                        <span class="badge pull-right">{{ stats.ipphonepartition_count }}</span>
-                        <h4 class="list-group-item-heading"><a href="{% url 'ipphone:ipphonepartition_list' %}">IP Phone Partitions</a></h4>
+                    {% if perms.ipphone.view_partition %}
+                        <span class="badge pull-right">{{ stats.partition_count }}</span>
+                        <h4 class="list-group-item-heading"><a href="{% url 'ipphone:partition_list' %}">Partitions</a></h4>
                     {% else %}
                         <span class="badge pull-right"><i class="fa fa-lock"></i></span>
-                        <h4 class="list-group-item-heading">IP Phone Partitions</h4>
+                        <h4 class="list-group-item-heading">Partitions</h4>
                     {% endif %}
-                    <p class="list-group-item-text text-muted">IP Phone Partitions</p>
+                    <p class="list-group-item-text text-muted">Partitions</p>
                 </div>
             </div>
         </div>

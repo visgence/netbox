@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from extras.api.views import CustomFieldModelViewSet
 from ipphone import filters
-from ipphone.models import Phone, IPPhonePartition
+from ipphone.models import Extension, Partition
 from utilities.api import FieldChoicesViewSet, ModelViewSet
 from utilities.utils import get_subquery
 from . import serializers
@@ -19,27 +19,27 @@ from . import serializers
 
 class IPPHONEFieldChoicesViewSet(FieldChoicesViewSet):
     fields = (
-        (Phone, ['phone_number'], ['ipphonepartition']),
-        (IPPhonePartition, ['name'], ['enforce_unique']),
+        (Extension, ['dn'], ['partition']),
+        (Partition, ['name'], ['enforce_unique']),
     )
 
 
 #
-# Phone Numbers
+# Extensions
 #
 
-class PhoneViewSet(CustomFieldModelViewSet):
-    queryset = Phone.objects.prefetch_related(
+class ExtensionViewSet(CustomFieldModelViewSet):
+    queryset = Extension.objects.prefetch_related(
         'interface__device__device_type', 'tags'
     )
-    serializer_class = serializers.PhoneSerializer
-    filterset_class = filters.PhoneFilter
+    serializer_class = serializers.ExtensionSerializer
+    filterset_class = filters.ExtensionFilter
 
 #
-# IPPhonePartitions
+# Partitions
 #
 
-class IPPhonePartitionViewSet(CustomFieldModelViewSet):
-    queryset = IPPhonePartition.objects.all()
-    serializer_class = serializers.IPPhonePartitionSerializer
-    filterset_class = filters.IPPhonePartitionFilter
+class PartitionViewSet(CustomFieldModelViewSet):
+    queryset = Partition.objects.all()
+    serializer_class = serializers.PartitionSerializer
+    filterset_class = filters.PartitionFilter

@@ -6,12 +6,12 @@
     <div class="row noprint">
         <div class="col-sm-8 col-md-9">
             <ol class="breadcrumb">
-                <li><a href="{% url 'ipphone:phone_list' %}">Phone Numbers</a></li>
-                <li>{{ phone }}</li>
+                <li><a href="{% url 'ipphone:extension_list' %}">Extensions</a></li>
+                <li>{{ extension }}</li>
             </ol>
         </div>
         <div class="col-sm-4 col-md-3">
-            <form action="{% url 'ipphone:phone_list' %}" method="get">
+            <form action="{% url 'ipphone:extension_list' %}" method="get">
                 <div class="input-group">
                     <input type="text" name="q" class="form-control" placeholder="Search Numbers" />
                     <span class="input-group-btn">
@@ -24,31 +24,31 @@
         </div>
     </div>
     <div class="pull-right noprint">
-        {% if perms.ipphone.change_phone %}
-            <a href="{% url 'ipphone:phone_edit' pk=phone.pk %}" class="btn btn-warning">
+        {% if perms.ipphone.change_extension %}
+            <a href="{% url 'ipphone:extension_edit' pk=extension.pk %}" class="btn btn-warning">
                 <span class="fa fa-pencil" aria-hidden="true"></span>
                 Edit this Number
             </a>
         {% endif %}
-        {% if perms.ipphone.delete_phone %}
-            <a href="{% url 'ipphone:phone_delete' pk=phone.pk %}" class="btn btn-danger">
+        {% if perms.ipphone.delete_extension %}
+            <a href="{% url 'ipphone:extension_delete' pk=extension.pk %}" class="btn btn-danger">
                 <span class="fa fa-trash" aria-hidden="true"></span>
                 Delete this Number
             </a>
         {% endif %}
     </div>
-    <h1>{% block title %}{{ phone }}{% endblock %}</h1>
-    {% include 'inc/created_updated.html' with obj=phone %}
+    <h1>{% block title %}{{ extension }}{% endblock %}</h1>
+    {% include 'inc/created_updated.html' with obj=extension %}
     <div class="pull-right noprint">
-        {% custom_links phone %}
+        {% custom_links extension %}
     </div>
     <ul class="nav nav-tabs">
         <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
-            <a href="{{ phone.get_absolute_url }}">Phone Number</a>
+            <a href="{{ extension.get_absolute_url }}">Extension</a>
         </li>
         {% if perms.extras.view_objectchange %}
             <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
-                <a href="{% url 'ipphone:phone_changelog' pk=phone.pk %}">Changelog</a>
+                <a href="{% url 'ipphone:extension_changelog' pk=extension.pk %}">Changelog</a>
             </li>
         {% endif %}
     </ul>
@@ -59,20 +59,20 @@
 	<div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <strong>Phone Number</strong>
+                <strong>Extension</strong>
             </div>
             <table class="table table-hover panel-body attr-table">
                 <tr>
                     <td>Status</td>
                     <td>
-                        <span class="label label-{{ phone.get_status_class }}">{{ phone.get_status_display }}</span>
+                        <span class="label label-{{ extension.get_status_class }}">{{ extension.get_status_display }}</span>
                     </td>
                 </tr>
                 <tr>
                     <td>Partition</td>
                     <td>
-                        {% if phone.ipphonepartition %}
-                            <span><a href="{{ phone.ipphonepartition.parent.get_absolute_url }}">{{ phone.ipphonepartition.parent }}</a> ({{ phone.ipphonepartition }})</span>
+                        {% if extension.partition %}
+                            <span><a href="{{ extension.partition.parent.get_absolute_url }}">{{ extension.partition.parent }}</a> ({{ extension.partition }})</span>
                         {% else %}
                             <span class="text-muted">&mdash;</span>
                         {% endif %}
@@ -80,13 +80,13 @@
                 </tr>
                 <tr>
                     <td>Description</td>
-                    <td>{{ phone.description|placeholder }}</td>
+                    <td>{{ extension.description|placeholder }}</td>
                 </tr>
                 <tr>
                     <td>Assignment</td>
                     <td>
-                        {% if phone.interface %}
-                            <span><a href="{{ phone.interface.parent.get_absolute_url }}">{{ phone.interface.parent }}</a> ({{ phone.interface }})</span>
+                        {% if extension.interface %}
+                            <span><a href="{{ extension.interface.parent.get_absolute_url }}">{{ extension.interface.parent }}</a> ({{ extension.interface }})</span>
                         {% else %}
                             <span class="text-muted">&mdash;</span>
                         {% endif %}
@@ -94,8 +94,8 @@
                 </tr>
             </table>
         </div>
-        {% include 'inc/custom_fields_panel.html' with obj=phone %}
-        {% include 'extras/inc/tags_panel.html' with tags=phone.tags.all url='ipphone:phone_list' %}
+        {% include 'inc/custom_fields_panel.html' with obj=extension %}
+        {% include 'extras/inc/tags_panel.html' with tags=extension.tags.all url='ipphone:extension_list' %}
 	</div>
 </div>
 {% endblock %}

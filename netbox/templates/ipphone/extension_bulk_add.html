@@ -2,19 +2,19 @@
 {% load static %}
 {% load form_helpers %}
 
-{% block title %}Bulk Add Phone Numbers{% endblock %}
+{% block title %}Bulk Add Extensions{% endblock %}
 
 {% block tabs %}
-    {% include 'ipphone/inc/phone_edit_header.html' with active_tab='bulk_add' %}
+    {% include 'ipphone/inc/extension_edit_header.html' with active_tab='bulk_add' %}
 {% endblock %}
 
 {% block form %}
     <div class="panel panel-default">
-        <div class="panel-heading"><strong>Phone Numbers</strong></div>
+        <div class="panel-heading"><strong>Extensions</strong></div>
         <div class="panel-body">
             {% render_field form.pattern %}
             {% render_field model_form.status %}
-            {% render_field model_form.ipphonepartition %}
+            {% render_field model_form.partition %}
             {% render_field model_form.description %}
         </div>
     </div>
