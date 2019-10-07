@@ -1,0 +1,87 @@
+{% extends '_base.html' %}
+{% load custom_links %}
+{% load helpers %}
+
+{% block header %}
+    <div class="row noprint">
+        <div class="col-sm-8 col-md-9">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'ipphone:ipphonepartition_list' %}">IP Phone Partitions</a></li>
+                <li>{{ ipphonepartition }}</li>
+            </ol>
+        </div>
+        <div class="col-sm-4 col-md-3">
+            <form action="{% url 'ipphone:ipphonepartition_list' %}" method="get">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Search IP Phone Partitions" />
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="fa fa-search" aria-hidden="true"></span>
+                        </button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="pull-right noprint">
+        {% if perms.ipphone.change_ipphonepartition %}
+            <a href="{% url 'ipphone:ipphonepartition_edit' pk=ipphonepartition.pk %}" class="btn btn-warning">
+                <span class="fa fa-pencil" aria-hidden="true"></span>
+                Edit this IP Phone Partition
+            </a>
+        {% endif %}
+        {% if perms.ipphone.delete_ipphonepartition %}
+            <a href="{% url 'ipphone:ipphonepartition_delete' pk=ipphonepartition.pk %}" class="btn btn-danger">
+                <span class="fa fa-trash" aria-hidden="true"></span>
+                Delete this IP Phone Partition
+            </a>
+        {% endif %}
+    </div>
+    <h1>{% block title %}IP Phone Partition {{ ipphonepartition }}{% endblock %}</h1>
+    {% include 'inc/created_updated.html' with obj=ipphonepartition %}
+    <div class="pull-right noprint">
+        {% custom_links ipphonepartition %}
+    </div>
+    <ul class="nav nav-tabs">
+        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
+            <a href="{{ ipphonepartition.get_absolute_url }}">IP Phone Partition</a>
+        </li>
+        {% if perms.extras.view_objectchange %}
+            <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
+                <a href="{% url 'ipphone:ipphonepartition_changelog' pk=ipphonepartition.pk %}">Changelog</a>
+            </li>
+        {% endif %}
+    </ul>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>IP Phone Partition</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>Unique Extension Space</td>
+                    <td>
+                        {% if ipphonepartition.enforce_unique %}
+                            <i class="glyphicon glyphicon-ok text-success" title="Yes"></i>
+                        {% else %}
+                            <i class="glyphicon glyphicon-remove text-danger" title="No"></i>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>{{ ipphonepartition.description|placeholder }}</td>
+                </tr>
+		    </table>
+        </div>
+        {% include 'extras/inc/tags_panel.html' with tags=ipphonepartition.tags.all url='ipphone:ipphonepartition_list' %}
+	</div>
+	<div class="col-md-6">
+        {% include 'inc/custom_fields_panel.html' with obj=ipphonepartition %}
+    </div>
+</div>
+{% endblock %}

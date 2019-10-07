@@ -25,6 +25,9 @@ from extras.models import ObjectChange, ReportResult, TopologyMap
 from ipam.filters import AggregateFilter, IPAddressFilter, PrefixFilter, VLANFilter, VRFFilter
 from ipam.models import Aggregate, IPAddress, Prefix, VLAN, VRF
 from ipam.tables import AggregateTable, IPAddressTable, PrefixTable, VLANTable, VRFTable
+from ipphone.filters import PhoneFilter, IPPhonePartitionFilter
+from ipphone.models import Phone, IPPhonePartition
+from ipphone.tables import PhoneTable, IPPhonePartitionTable
 from secrets.filters import SecretFilter
 from secrets.models import Secret
 from secrets.tables import SecretTable
@@ -204,6 +207,8 @@ class HomeView(View):
             'aggregate_count': Aggregate.objects.count(),
             'prefix_count': Prefix.objects.count(),
             'ipaddress_count': IPAddress.objects.count(),
+            'phone_number_count': Phone.objects.count(),
+            'ipphonepartition_count': IPPhonePartition.objects.count(),
             'vlan_count': VLAN.objects.count(),
 
             # Circuits

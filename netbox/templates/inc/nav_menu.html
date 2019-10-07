@@ -292,6 +292,31 @@
                         </li>
                     </ul>
                 </li>
+                <li class="dropdown{% if request.path|contains:'/ipphone/' %} active{% endif %}">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">IP Phone <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header">IP Phone</li>
+                        <li{% if not perms.ipphone.view_phone %} class="disabled"{% endif %}>
+                            {% if perms.ipphone.add_phone %}
+                                <div class="buttons pull-right">
+                                    <a href="{% url 'ipphone:phone_add' %}" class="btn btn-xs btn-success" title="Add"><i class="fa fa-plus"></i></a>
+                                    <a href="{% url 'ipphone:phone_import' %}" class="btn btn-xs btn-info" title="Import"><i class="fa fa-download"></i></a>
+                                </div>
+                            {% endif %}
+                            <a href="{% url 'ipphone:phone_list' %}">Phone Numbers</a>
+                        </li>
+                        <li{% if not perms.ipphone.view_ipphonepartition %} class="disabled"{% endif %}>
+                            {% if perms.ipphone.add_ipphonepartition %}
+                                <div class="buttons pull-right">
+                                    <a href="{% url 'ipphone:ipphonepartition_add' %}" class="btn btn-xs btn-success" title="Add"><i class="fa fa-plus"></i></a>
+                                    <a href="{% url 'ipphone:ipphonepartition_import' %}" class="btn btn-xs btn-info" title="Import"><i class="fa fa-download"></i></a>
+                                </div>
+                            {% endif %}
+                            <a href="{% url 'ipphone:ipphonepartition_list' %}">IP Phone Partitions</a>
+                        </li>
+                        <li class="divider"></li>
+                    </ul>
+                </li>
                 <li class="dropdown{% if request.path|contains:'/virtualization/' %} active{% endif %}">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Virtualization <span class="caret"></span></a>
                     <ul class="dropdown-menu">

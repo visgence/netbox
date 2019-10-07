@@ -1,0 +1,64 @@
+{% extends 'utilities/obj_edit.html' %}
+{% load static %}
+{% load form_helpers %}
+{% load helpers %}
+
+{% block tabs %}
+    {% if not obj.pk %}
+        {% include 'ipphone/inc/phone_edit_header.html' with active_tab='add' %}
+    {% endif %}
+{% endblock %}
+
+{% block form %}
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Phone Number</strong></div>
+        <div class="panel-body">
+            {% render_field form.phone_number %}
+            {% render_field form.ipphonepartition %}
+            {% render_field form.status %}
+            {% render_field form.description %}
+        </div>
+    </div>
+    <!-- <div class="panel panel-default">
+        <div class="panel-heading"><strong>Site</strong></div>
+        <div class="panel-body">
+            {% render_field form.site %}
+        </div>
+    </div> -->
+    <!-- {% if obj.interface %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Interface Assignment</strong>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{{ obj.interface.parent|model_name|bettertitle }}</label>
+                    <div class="col-md-9">
+                        <p class="form-control-static">
+                            <a href="{{ obj.interface.parent.get_absolute_url }}">{{ obj.interface.parent }}</a>
+                        </p>
+                    </div>
+                </div>
+                {% render_field form.interface %}
+            </div>
+        </div>
+    {% endif %} -->
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Tags</strong></div>
+        <div class="panel-body">
+            {% render_field form.tags %}
+        </div>
+    </div>
+    {% if form.custom_fields %}
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Custom Fields</strong></div>
+            <div class="panel-body">
+                {% render_custom_fields form %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/livesearch.js' %}?v{{ settings.VERSION }}"></script>
+{% endblock %}

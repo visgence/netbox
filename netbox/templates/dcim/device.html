@@ -553,7 +553,7 @@
                         <strong>Interfaces</strong>
                         <div class="pull-right noprint">
                             <button class="btn btn-default btn-xs toggle-ips" selected="selected">
-                                <span class="glyphicon glyphicon-check" aria-hidden="true"></span> Show IPs
+                                <span class="glyphicon glyphicon-check" aria-hidden="true"></span> Show IPs / Phone #s
                             </button>
                         </div>
                     </div>
@@ -905,8 +905,10 @@ $('button.toggle-ips').click(function() {
     var selected = $(this).attr('selected');
     if (selected) {
         $('#interfaces_table tr.ipaddresses').hide();
+        $('#interfaces_table tr.phones').hide();
     } else {
         $('#interfaces_table tr.ipaddresses').show();
+        $('#interfaces_table tr.phones').show();
     }
     $(this).attr('selected', !selected);
     $(this).children('span').toggleClass('glyphicon-check glyphicon-unchecked');

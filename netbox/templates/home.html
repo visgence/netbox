@@ -205,6 +205,33 @@
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">
+                <strong>IP Phone</strong>
+            </div>
+            <div class="list-group">
+                <div class="list-group-item">
+                    {% if perms.ipphone.view_phones %}
+                        <span class="badge pull-right">{{ stats.phone_number_count }}</span>
+                        <h4 class="list-group-item-heading"><a href="{% url 'ipphone:phone_list' %}">Phone Numbers</a></h4>
+                    {% else %}
+                        <span class="badge pull-right"><i class="fa fa-lock"></i></span>
+                        <h4 class="list-group-item-heading">Phone Numbers</h4>
+                    {% endif %}
+                    <p class="list-group-item-text text-muted">Individual Phone Numbers</p>
+                </div>
+                <div class="list-group-item">
+                    {% if perms.ipphone.view_ipphonepartition %}
+                        <span class="badge pull-right">{{ stats.ipphonepartition_count }}</span>
+                        <h4 class="list-group-item-heading"><a href="{% url 'ipphone:ipphonepartition_list' %}">IP Phone Partitions</a></h4>
+                    {% else %}
+                        <span class="badge pull-right"><i class="fa fa-lock"></i></span>
+                        <h4 class="list-group-item-heading">IP Phone Partitions</h4>
+                    {% endif %}
+                    <p class="list-group-item-text text-muted">IP Phone Partitions</p>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
                 <strong>Circuits</strong>
             </div>
             <div class="list-group">

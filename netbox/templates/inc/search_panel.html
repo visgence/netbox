@@ -9,7 +9,7 @@
         <form action="." method="get" class="form">
                 {% for field in filter_form %}
                     <div class="form-group">
-                        {% if field.name == "q" %}
+                        {% if field.name == "q" or field.name == "phone_number" %}
                             <div class="input-group">
                                 <input type="text" name="q" class="form-control" placeholder="Search" {% if request.GET.q %}value="{{ request.GET.q }}" {% endif %}/>
                                 <span class="input-group-btn">

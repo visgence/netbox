@@ -677,7 +677,7 @@ class ChainedFieldsMixin(forms.BaseForm):
                     field.queryset = field.queryset.filter(**filters_dict)
                 elif not self.is_bound and getattr(self, 'instance', None) and hasattr(self.instance, field_name):
                     obj = getattr(self.instance, field_name)
-                    if obj is not None:
+                    if obj is not None and obj != '':
                         field.queryset = field.queryset.filter(pk=obj.pk)
                     else:
                         field.queryset = field.queryset.none()
