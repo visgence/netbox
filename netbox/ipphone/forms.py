@@ -104,18 +104,6 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
             }
         )
     )
-    # dn = ChainedModelChoiceField(
-    #     queryset=Extension.objects.all(),
-    #     chains=(
-    #         ('interface__device', 'device'),
-    #     ),
-    #     required=False,
-    #     label='Extension',
-    #     widget=APISelect(
-    #         api_url='/api/ipphone/extensions/',
-    #         display_field='dn'
-    #     )
-    # )
     tags = TagField(
         required=False
     )
@@ -142,6 +130,7 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
 
         super().__init__(*args, **kwargs)
 
+        self.fields['partition'].empty_label = 'Global'
 
         # Limit interface selections to those belonging to the parent device/VM
         if self.instance and self.instance.interface:
@@ -151,6 +140,9 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
         else:
             self.fields['interface'].choices = []
 
+        if self.instance.pk and self.instance.interface is not None:
+            parent = self.instance.interface.parent
+
     def clean(self):
         super().clean()
 
@@ -159,8 +151,10 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
         extension = super().save(*args, **kwargs)
 
         # Assign/clear this Extension as the primary for the associated Device.
-        # parent = self.cleaned_data['interface'].parent
-        extension.save()
+        if self.cleaned_data['interface']:
+            parent = self.cleaned_data['interface'].parent
+            parent.save()
+
 
         return extension
 
@@ -253,9 +247,6 @@ class ExtensionCSVForm(forms.ModelForm):
             )
 
         dn = super().save(*args, **kwargs)
-        dn.save()
-        # parent = self.cleaned_data['device']
-        # parent.save()
 
         return dn
 
@@ -305,15 +296,6 @@ class ExtensionFilterForm(BootstrapMixin, CustomFieldFilterForm):
             null_option=True,
         )
     )
-    # parent = forms.CharField(
-    #     required=False,
-    #     widget=forms.TextInput(
-    #         attrs={
-    #             'placeholder': 'Prefix',
-    #         }
-    #     ),
-    #     label='Parent Prefix'
-    # )
     status = forms.MultipleChoiceField(
         choices=EXTENSION_STATUS_CHOICES,
         required=False,

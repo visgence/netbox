@@ -31,7 +31,6 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
     partition = models.ForeignKey(
         to='ipphone.Partition',
         on_delete=models.PROTECT,
-        # related_name='',
         blank=True,
         null=True,
         verbose_name='Partition'

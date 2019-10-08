@@ -280,7 +280,7 @@
                         <tr class="text-muted">
                             <th class="col-md-3">Extension</th>
                             <th class="col-md-2">Status</th>
-                            <th class="col-md-3"></th>
+                            <th class="col-md-3">Partition</th>
                             <th class="col-md-3">Description</th>
                             <th class="col-md-1"></th>
                         </tr>
@@ -298,7 +298,14 @@
                                 <span class="label label-{{ ph.get_status_class }}">{{ ph.get_status_display }}</span>
                             </td>
 
-                            <td></td>
+                            {# Partition #}
+                            <td>
+                                {% if ph.partition %}
+                                    <a href="{% url 'ipphone:partitions' pk=ph.partition.pk %}">{{ ph.partition.name }}</a>
+                                {% else %}
+                                    <span class="text-muted">Global</span>
+                                {% endif %}
+                            </td>
 
                             {# Description #}
                             <td>

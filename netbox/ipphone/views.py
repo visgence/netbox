@@ -22,7 +22,7 @@ from .models import Extension, Partition
 
 class PartitionListView(PermissionRequiredMixin, ObjectListView):
     permission_required = 'ipphone.view_partition'
-    queryset = Partition.objects.all() # prefetch_related('tenant')
+    queryset = Partition.objects.all()
     filter = filters.PartitionFilter
     filter_form = forms.PartitionFilterForm
     table = tables.PartitionTable
@@ -77,7 +77,7 @@ class PartitionBulkEditView(PermissionRequiredMixin, BulkEditView):
 
 class PartitionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
         permission_required = 'ipphone.delete_partition'
-        queryset = Partition.objects.all() # prefetch_related('')
+        queryset = Partition.objects.all()
         filter = filters.PartitionFilter
         table = tables.PartitionTable
         default_return_url = 'ipphone:partition_list'
@@ -105,34 +105,8 @@ class ExtensionView(PermissionRequiredMixin, View):
 
         extension = get_object_or_404(Extension.objects.prefetch_related('interface__device'), pk=pk)
 
-        # # TBD 
-
-        # # Duplicate s table
-        # # duplicate_pns = Extension.objects.filter(
-        # #     dn=str(extension.dn)
-        # # ).exclude(
-        # #     pk=extension.pk
-        # # ).prefetch_related(
-        # #     'interface__device'
-        # # )
-        # duplicate_pns = []
-
-        # duplicate_pns_table = tables.ExtensionTable(list(duplicate_pns), orderable=False)
-
-        # related_pns = []
-
-        # # related_pns = Extension.objects.prefetch_related(
-        # #     'interface__device'
-        # # ).exclude(
-        # #     dn=str(extension.dn)
-        # # )
-
-        # related_pns_table = tables.ExtensionTable(list(related_pns), orderable=False)
-
         return render(request, 'ipphone/extension.html', {
             'extension': extension,
-            # 'duplicate_pns_table': duplicate_pns_table,
-            # 'related_pns_table': related_pns_table,
         })
 
 
