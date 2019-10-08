@@ -20,10 +20,6 @@ class ExtensionFilter(CustomFieldFilterSet):
         method='search',
         label='Search',
     )
-    parent = django_filters.CharFilter(
-        method='search_by_parent',
-        label='Parent prefix',
-    )
     dn = django_filters.CharFilter(
         method='filter_dn',
         label='Extension',
@@ -75,7 +71,7 @@ class ExtensionFilter(CustomFieldFilterSet):
         if not value.strip():
             return queryset
         try:
-            return queryset.filter(dn=value)
+            return queryset.filter(dn__icontains=value)
         except ValidationError:
             return queryset.none()
 

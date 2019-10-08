@@ -78,7 +78,7 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
         return reverse('ipphone:extension', args=[self.pk])
 
     def get_duplicates(self):
-        return Extension.objects.filter(dn=self.dn).exclude(pk=self.pk)
+        return Extension.objects.filter(partition=self.partition,dn=self.dn).exclude(pk=self.pk)
 
     def clean(self):
 

@@ -7,7 +7,7 @@ from dcim.models import Site, Rack, Device, Interface
 from extras.forms import AddRemoveTagsForm, CustomFieldForm, CustomFieldBulkEditForm, CustomFieldFilterForm
 from utilities.forms import (
     add_blank_choice, APISelect, APISelectMultiple, BootstrapMixin, BulkEditNullBooleanSelect, ChainedModelChoiceField,
-    CSVChoiceField, ExpandableIPAddressField, FilterChoiceField, FlexibleModelChoiceField, ReturnURLForm, SlugField,
+    CSVChoiceField, ExpandableExtensionField, FilterChoiceField, FlexibleModelChoiceField, ReturnURLForm, SlugField,
     StaticSelect2, StaticSelect2Multiple, BOOLEAN_WITH_BLANK_CHOICES
 )
 from virtualization.models import VirtualMachine
@@ -166,10 +166,9 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
 
 
 class ExtensionBulkCreateForm(BootstrapMixin, forms.Form):
-    # pattern = ExpandableExtensionField(
-    #     label='Extension pattern'
-    # )
-    pattern = ''
+    pattern = ExpandableExtensionField(
+        label='Extension pattern'
+    )
 
 
 class ExtensionBulkAddForm(BootstrapMixin, CustomFieldForm):
@@ -291,11 +290,20 @@ class ExtensionAssignForm(BootstrapMixin, forms.Form):
 class ExtensionFilterForm(BootstrapMixin, CustomFieldFilterForm):
     model = Extension
     field_order = [
-        'q', 'parent', 'partition', 'status'
+        'q', 'partition_id', 'status'
     ]
     q = forms.CharField(
         required=False,
         label='Search'
+    )
+    partition_id = FilterChoiceField(
+        queryset=Partition.objects.all(),
+        label='Partition',
+        null_label='-- Global --',
+        widget=APISelectMultiple(
+            api_url="/api/ipphone/partitions/",
+            null_option=True,
+        )
     )
     # parent = forms.CharField(
     #     required=False,

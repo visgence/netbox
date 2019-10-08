@@ -105,6 +105,13 @@ def expand_ipaddress_pattern(string, family):
             yield ''.join([lead, format(i, 'x' if family == 6 else 'd'), remnant])
 
 
+def expand_extension_pattern(string):
+    parsed_range = parse_numeric_range(string)
+    for i in parsed_range:
+        yield ''.join([str(i)])
+
+
+
 def add_blank_choice(choices):
     """
     Add a blank choice to the beginning of a choices list.
@@ -476,6 +483,22 @@ class ExpandableIPAddressField(forms.CharField):
             return list(expand_ipaddress_pattern(value, 4))
         elif ':' in value and re.search(IP6_EXPANSION_PATTERN, value):
             return list(expand_ipaddress_pattern(value, 6))
+        return [value]
+
+
+class ExpandableExtensionField(forms.CharField):
+    """
+    A field which allows for expansion of dn ranges
+      Example: '50000-59999' => ['50000', '50001', '50002' ... '59999']
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.help_text:
+            self.help_text = 'Specify a numeric range to create multiple DNs.<br />'\
+                             'Example: <code>50000-59999</code>'
+
+    def to_python(self, value):
+        return list(expand_extension_pattern(value))
         return [value]
 
 

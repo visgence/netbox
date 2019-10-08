@@ -93,7 +93,7 @@ class ExtensionListView(PermissionRequiredMixin, ObjectListView):
         'interface__device'
     )
     filter = filters.ExtensionFilter
-    filter_form = forms.ExtensionForm
+    filter_form = forms.ExtensionFilterForm
     table = tables.ExtensionDetailTable
     template_name = 'ipphone/extension_list.html'
 

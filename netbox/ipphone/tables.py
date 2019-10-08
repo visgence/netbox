@@ -53,32 +53,30 @@ class ExtensionTable(BaseTable):
     dn = tables.TemplateColumn(EXTENSION_LINK, verbose_name='DN')
     partition = tables.TemplateColumn(PARTITION_LINK, verbose_name='Partition')
     status = tables.TemplateColumn(STATUS_LABEL)
-    parent = tables.TemplateColumn(EXTENSION_PARENT, orderable=False)
     interface = tables.Column(orderable=False)
 
     class Meta(BaseTable.Meta):
         model = Extension
         fields = (
-            'pk', 'dn', 'partition', 'status', 'parent', 'interface', 'description',
+            'pk', 'dn', 'partition', 'status', 'interface', 'description',
         )
 
 
 class ExtensionDetailTable(ExtensionTable):
     class Meta(ExtensionTable.Meta):
         fields = (
-            'pk', 'dn', 'partition', 'status', 'parent', 'interface', 'description',
+            'pk', 'dn', 'partition', 'status', 'interface', 'description',
         )
 
 
 class ExtensionAssignTable(BaseTable):
     dn = tables.TemplateColumn(EXTENSION_ASSIGN_LINK, verbose_name='DN')
     status = tables.TemplateColumn(STATUS_LABEL)
-    parent = tables.TemplateColumn(EXTENSION_PARENT, orderable=False)
     interface = tables.Column(orderable=False)
 
     class Meta(BaseTable.Meta):
         model = Extension
-        fields = ('dn', 'partition', 'status', 'parent', 'interface', 'description')
+        fields = ('dn', 'partition', 'status', 'interface', 'description')
         orderable = False
 
 
