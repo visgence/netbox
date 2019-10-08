@@ -2,7 +2,7 @@
 {% load static %}
 {% load form_helpers %}
 
-{% block title %}Bulk Add Extensions{% endblock %}
+{% block title %}Bulk Add DNs{% endblock %}
 
 {% block tabs %}
     {% include 'ipphone/inc/extension_edit_header.html' with active_tab='bulk_add' %}
@@ -18,12 +18,4 @@
             {% render_field model_form.description %}
         </div>
     </div>
-    {% if model_form.custom_fields %}
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Custom Fields</strong></div>
-            <div class="panel-body">
-                {% render_custom_fields model_form %}
-            </div>
-        </div>
-    {% endif %}
 {% endblock %}

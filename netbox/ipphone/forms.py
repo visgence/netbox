@@ -161,7 +161,7 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
 
 class ExtensionBulkCreateForm(BootstrapMixin, forms.Form):
     pattern = ExpandableExtensionField(
-        label='Extension pattern'
+        label='DN pattern'
     )
 
 
