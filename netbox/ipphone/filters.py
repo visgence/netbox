@@ -4,12 +4,12 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from netaddr.core import AddrFormatError
 
-from dcim.models import Site, Device, Interface
 from extras.filters import CustomFieldFilterSet
 from tenancy.filtersets import TenancyFilterSet
 from utilities.filters import NameSlugSearchFilterSet, NumericInFilter, TagFilter
 from .constants import EXTENSION_STATUS_CHOICES
-from .models import Extension, Partition
+from .models import Extension, Partition, Line
+from dcim.models import Device
 
 class ExtensionFilter(CustomFieldFilterSet):
     id__in = NumericInFilter(
@@ -28,15 +28,15 @@ class ExtensionFilter(CustomFieldFilterSet):
         queryset=Partition.objects.all(),
         label='Partition',
     )
-    interface = django_filters.ModelMultipleChoiceFilter(
-        field_name='interface__name',
-        queryset=Interface.objects.all(),
+    line = django_filters.ModelMultipleChoiceFilter(
+        field_name='line__name',
+        queryset=Line.objects.all(),
         to_field_name='name',
-        label='Interface (ID)',
+        label='Line (ID)',
     )
-    interface_id = django_filters.ModelMultipleChoiceFilter(
-        queryset=Interface.objects.all(),
-        label='Interface (ID)',
+    line_id = django_filters.ModelMultipleChoiceFilter(
+        queryset=Line.objects.all(),
+        label='Line (ID)',
     )
     status = django_filters.MultipleChoiceFilter(
         choices=EXTENSION_STATUS_CHOICES,
@@ -98,3 +98,27 @@ class PartitionFilter(TenancyFilterSet, CustomFieldFilterSet):
     class Meta:
         model = Partition
         fields = ['name', 'enforce_unique']
+
+
+class LineFilter(django_filters.FilterSet):
+    q = django_filters.CharFilter(
+        method='search',
+        label='Search',
+    )
+    device_id = django_filters.ModelMultipleChoiceFilter(
+        queryset=Device.objects.all(),
+        label='Device (ID)',
+    )
+    device = django_filters.ModelChoiceFilter(
+        queryset=Device.objects.all(),
+        to_field_name='name',
+        label='Device (name)',
+    )
+    tag = TagFilter()
+
+    def search(self, queryset, name, value):
+        if not value.strip():
+            return queryset
+        return queryset.filter(
+            Q(name__icontains=value)
+        )

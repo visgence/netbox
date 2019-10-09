@@ -206,7 +206,6 @@ class ObjectEditView(GetReturnURLMixin, View):
         # Parse initial data manually to avoid setting field values as lists
         initial_data = {k: request.GET[k] for k in request.GET}
         form = self.model_form(instance=obj, initial=initial_data)
-
         return render(request, self.template_name, {
             'obj': obj,
             'obj_type': self.model._meta.verbose_name,

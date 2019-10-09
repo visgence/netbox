@@ -19,21 +19,21 @@
             {% render_field form.description %}
         </div>
     </div>
-    {% if obj.interface %}
+    {% if obj.line %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <strong>Interface Assignment</strong>
+                <strong>Line Assignment</strong>
             </div>
             <div class="panel-body">
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{{ obj.interface.parent|model_name|bettertitle }}</label>
+                    <label class="col-md-3 control-label">{{ obj.line.parent|model_name|bettertitle }}</label>
                     <div class="col-md-9">
                         <p class="form-control-static">
-                            <a href="{{ obj.interface.parent.get_absolute_url }}">{{ obj.interface.parent }}</a>
+                            <a href="{{ obj.line.parent.get_absolute_url }}">{{ obj.line.parent }}</a>
                         </p>
                     </div>
                 </div>
-                {% render_field form.interface %}
+                {% render_field form.line %}
             </div>
         </div>
     {% endif %}

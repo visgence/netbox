@@ -21,6 +21,8 @@ from extras.models import Graph, TopologyMap
 from extras.views import ObjectConfigContextView
 from ipam.models import Prefix, VLAN
 from ipam.tables import InterfaceIPAddressTable, InterfaceVLANTable
+from ipphone.models import Line
+from ipphone.tables import LineExtensionTable
 from utilities.forms import ConfirmationForm
 from utilities.paginator import EnhancedPaginator
 from utilities.utils import csv_format
@@ -920,7 +922,7 @@ class DeviceView(PermissionRequiredMixin, View):
     def get(self, request, pk):
 
         device = get_object_or_404(Device.objects.prefetch_related(
-            'site__region', 'rack__group', 'tenant__group', 'device_role', 'platform'
+            'site__region', 'rack__group', 'tenant__group', 'device_role', 'platform', 'lines'
         ), pk=pk)
 
         # VirtualChassis members
@@ -948,6 +950,8 @@ class DeviceView(PermissionRequiredMixin, View):
             'lag', '_connected_interface__device', '_connected_circuittermination__circuit', 'cable',
             'cable__termination_a', 'cable__termination_b', 'ip_addresses', 'tags'
         )
+        # Lines
+        lines = device.lines.all()
 
         # Front ports
         front_ports = device.frontports.prefetch_related('rear_port', 'cable')
@@ -980,6 +984,7 @@ class DeviceView(PermissionRequiredMixin, View):
             'power_ports': power_ports,
             'poweroutlets': poweroutlets,
             'interfaces': interfaces,
+            'lines': lines,
             'device_bays': device_bays,
             'front_ports': front_ports,
             'rear_ports': rear_ports,
@@ -1648,6 +1653,21 @@ class DeviceBulkAddInterfaceView(PermissionRequiredMixin, BulkComponentCreateVie
     parent_field = 'device'
     form = forms.DeviceBulkAddInterfaceForm
     model = Interface
+    model_form = forms.InterfaceForm
+    filter = filters.DeviceFilter
+    table = tables.DeviceTable
+    default_return_url = 'dcim:device_list'
+
+
+### FIX 
+
+
+class DeviceBulkAddLineView(PermissionRequiredMixin, BulkComponentCreateView):
+    permission_required = 'dcim.add_interface'
+    parent_model = Device
+    parent_field = 'device'
+    form = forms.DeviceBulkAddInterfaceForm
+    model = Line
     model_form = forms.InterfaceForm
     filter = filters.DeviceFilter
     table = tables.DeviceTable

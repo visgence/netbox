@@ -5,15 +5,15 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 from django_tables2 import RequestConfig
 
-from dcim.models import Device, Interface
+from dcim.models import Device
 from utilities.paginator import EnhancedPaginator
 from utilities.views import (
-    BulkCreateView, BulkDeleteView, BulkEditView, BulkImportView, ObjectDeleteView, ObjectEditView, ObjectListView,
+    BulkCreateView, BulkDeleteView, BulkEditView, BulkImportView, ObjectDeleteView, ObjectEditView, ObjectListView, ComponentCreateView
 )
 from virtualization.models import VirtualMachine
 from . import filters, forms, tables
 from .constants import *
-from .models import Extension, Partition
+from .models import Extension, Partition, Line
 
 
 #
@@ -90,7 +90,7 @@ class PartitionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
 class ExtensionListView(PermissionRequiredMixin, ObjectListView):
     permission_required = 'ipphone.view_dn'
     queryset = Extension.objects.prefetch_related(
-        'interface__device'
+        'line__device'
     )
     filter = filters.ExtensionFilter
     filter_form = forms.ExtensionFilterForm
@@ -103,7 +103,7 @@ class ExtensionView(PermissionRequiredMixin, View):
 
     def get(self, request, pk):
 
-        extension = get_object_or_404(Extension.objects.prefetch_related('interface__device'), pk=pk)
+        extension = get_object_or_404(Extension.objects.prefetch_related('line__device'), pk=pk)
 
         return render(request, 'ipphone/extension.html', {
             'extension': extension,
@@ -118,12 +118,11 @@ class ExtensionCreateView(PermissionRequiredMixin, ObjectEditView):
     default_return_url = 'ipphone:extension_list'
 
     def alter_obj(self, obj, request, url_args, url_kwargs):
-
-        interface_id = request.GET.get('interface')
-        if interface_id:
+        line_id = request.GET.get('line')
+        if line_id:
             try:
-                obj.interface = Interface.objects.get(pk=interface_id)
-            except (ValueError, Interface.DoesNotExist):
+                obj.line = Line.objects.get(pk=line_id)
+            except (ValueError, Line.DoesNotExist):
                 pass
 
         return obj
@@ -135,14 +134,14 @@ class ExtensionEditView(ExtensionCreateView):
 
 class ExtensionAssignView(PermissionRequiredMixin, View):
     """
-    Search for Extension Numbers to be assigned to an Interface.
+    Search for Extension Numbers to be assigned to an Line.
     """
     permission_required = 'ipphone.change_extension'
 
     def dispatch(self, request, *args, **kwargs):
 
-        # Redirect user if an interface has not been provided
-        if 'interface' not in request.GET:
+        # Redirect user if an line has not been provided
+        if 'line' not in request.GET:
             return redirect('ipphone:extension_add')
 
         return super().dispatch(request, *args, **kwargs)
@@ -164,7 +163,7 @@ class ExtensionAssignView(PermissionRequiredMixin, View):
         if form.is_valid():
 
             queryset = Extension.objects.prefetch_related(
-                'interface__device'
+                'line__device'
             ).filter(
                 dn__istartswith=form.cleaned_data['dn'],
             )[:100]  # Limit to 100 results
@@ -202,7 +201,7 @@ class ExtensionBulkImportView(PermissionRequiredMixin, BulkImportView):
 
 class ExtensionBulkEditView(PermissionRequiredMixin, BulkEditView):
     permission_required = 'ipphone.change_extension'
-    queryset = Extension.objects.prefetch_related('interface__device')
+    queryset = Extension.objects.prefetch_related('line__device')
     filter = filters.ExtensionFilter
     table = tables.ExtensionTable
     form = forms.ExtensionBulkEditForm
@@ -211,9 +210,50 @@ class ExtensionBulkEditView(PermissionRequiredMixin, BulkEditView):
 
 class ExtensionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
     permission_required = 'ipphone.delete_extension'
-    queryset = Extension.objects.prefetch_related('interface__device')
+    queryset = Extension.objects.prefetch_related('line__device')
     filter = filters.ExtensionFilter
     table = tables.ExtensionTable
     default_return_url = 'ipphone:extension_list'
 
+
+#
+# Lines
+#
+
+class LineView(PermissionRequiredMixin, View):
+    permission_required = 'ipphone.view_line'
+
+    def get(self, request, pk):
+
+        line = get_object_or_404(Line, pk=pk)
+
+        # Get assigned Extension
+        extension_table = LineExtensionTable(
+            data=line.extension.prefetch_related('partition'),
+            orderable=False
+        )
+
+        return render(request, 'ipphone/line.html', {
+            'line': line,
+            'extension_table': extension_table,
+        })
+
+class LineCreateView(PermissionRequiredMixin, ComponentCreateView):
+    permission_required = 'ipphone.add_line'
+    parent_model = Device
+    parent_field = 'device'
+    model = Line
+    form = forms.LineCreateForm
+    model_form = forms.LineForm
+    template_name = 'ipphone/device_component_add.html'
+
+class LineEditView(PermissionRequiredMixin, ObjectEditView):
+    permission_required = 'dcim.change_line'
+    model = Line
+    model_form = forms.LineForm
+    template_name = 'dcim/line_edit.html'
+
+class LineDeleteView(PermissionRequiredMixin, ObjectDeleteView):
+    permission_required = 'ipphone.delete_line'
+    model = Line
 

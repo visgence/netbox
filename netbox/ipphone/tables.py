@@ -1,10 +1,9 @@
 import django_tables2 as tables
 from django_tables2.utils import Accessor
 
-from dcim.models import Interface
 from tenancy.tables import COL_TENANT
 from utilities.tables import BaseTable, BooleanColumn, ToggleColumn
-from .models import Extension, Partition
+from .models import Extension, Partition, Line
 
 PARTITION_LINK = """
 {% if record.partition %}
@@ -25,12 +24,12 @@ EXTENSION_LINK = """
 """
 
 EXTENSION_ASSIGN_LINK = """
-<a href="{% url 'ipphone:extension_edit' pk=record.pk %}?interface={{ request.GET.interface }}&return_url={{ request.GET.return_url }}">{{ record }}</a>
+<a href="{% url 'ipphone:extension_edit' pk=record.pk %}?line={{ request.GET.line }}&return_url={{ request.GET.return_url }}">{{ record }}</a>
 """
 
 EXTENSION_PARENT = """
-{% if record.interface %}
-    <a href="{{ record.interface.parent.get_absolute_url }}">{{ record.interface.parent }}</a>
+{% if record.line %}
+    <a href="{{ record.line.parent.get_absolute_url }}">{{ record.line.parent }}</a>
 {% else %}
     &mdash;
 {% endif %}
@@ -44,6 +43,7 @@ STATUS_LABEL = """
 {% endif %}
 """
 
+
 #
 # Extensions
 #
@@ -53,36 +53,36 @@ class ExtensionTable(BaseTable):
     dn = tables.TemplateColumn(EXTENSION_LINK, verbose_name='DN')
     partition = tables.TemplateColumn(PARTITION_LINK, verbose_name='Partition')
     status = tables.TemplateColumn(STATUS_LABEL)
-    interface = tables.Column(orderable=False)
+    line = tables.Column(orderable=False)
 
     class Meta(BaseTable.Meta):
         model = Extension
         fields = (
-            'pk', 'dn', 'partition', 'status', 'interface', 'description',
+            'pk', 'dn', 'partition', 'status', 'line', 'description',
         )
 
 
 class ExtensionDetailTable(ExtensionTable):
     class Meta(ExtensionTable.Meta):
         fields = (
-            'pk', 'dn', 'partition', 'status', 'interface', 'description',
+            'pk', 'dn', 'partition', 'status', 'line', 'description',
         )
 
 
 class ExtensionAssignTable(BaseTable):
     dn = tables.TemplateColumn(EXTENSION_ASSIGN_LINK, verbose_name='DN')
     status = tables.TemplateColumn(STATUS_LABEL)
-    interface = tables.Column(orderable=False)
+    line = tables.Column(orderable=False)
 
     class Meta(BaseTable.Meta):
         model = Extension
-        fields = ('dn', 'partition', 'status', 'interface', 'description')
+        fields = ('dn', 'partition', 'status', 'line', 'description')
         orderable = False
 
 
-class InterfaceExtensionTable(BaseTable):
+class LineExtensionTable(BaseTable):
     """
-    List Extension assigned to a specific Interface.
+    List Extension assigned to a specific Line.
     """
     dn = tables.TemplateColumn(EXTENSION_ASSIGN_LINK, verbose_name='DN')
     status = tables.TemplateColumn(STATUS_LABEL)
@@ -104,3 +104,20 @@ class PartitionTable(BaseTable):
         model = Partition
         fields = ('pk', 'name', 'description', 'enforce_unique')
 
+
+
+
+#
+# Lines
+#
+
+class LineExtensionTable(BaseTable):
+    """
+    List Extensions assigned to a specific Line.
+    """
+    extension = tables.TemplateColumn(EXTENSION_ASSIGN_LINK, verbose_name='Extension')
+    partition = tables.TemplateColumn(PARTITION_LINK, verbose_name='Partition')
+
+    class Meta(BaseTable.Meta):
+        model = Line
+        fields = ('extension', 'partition')

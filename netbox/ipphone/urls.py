@@ -1,8 +1,9 @@
 from django.urls import path
 
+from dcim.views import DeviceBulkAddLineView
 from extras.views import ObjectChangeLogView
 from . import views
-from .models import Extension, Partition
+from .models import Extension, Partition, Line
 
 app_name = 'ipphone'
 urlpatterns = [
@@ -21,7 +22,6 @@ urlpatterns = [
     path(r'extensions/<int:pk>/delete/', views.ExtensionDeleteView.as_view(), name='extension_delete'),
 
     # Partitions
-
     path(r'partitions/', views.PartitionListView.as_view(), name='partition_list'),
     path(r'partitions/add/', views.PartitionCreateView.as_view(), name='partition_add'),
     path(r'partitions/import/', views.PartitionBulkImportView.as_view(), name='partition_import'),
@@ -31,4 +31,16 @@ urlpatterns = [
     path(r'partitions/<int:pk>/edit/', views.PartitionEditView.as_view(), name='partition_edit'),
     path(r'partitions/<int:pk>/delete/', views.PartitionDeleteView.as_view(), name='partition_delete'),
     path(r'partitions/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name='partition_changelog', kwargs={'model': Partition}),
+
+    # # Lines
+    path(r'devices/lines/add/', DeviceBulkAddLineView.as_view(), name='device_bulk_add_line'),
+    path(r'devices/<int:pk>/lines/add/', views.LineCreateView.as_view(), name='line_add'),
+    # path(r'devices/<int:pk>/lines/edit/', views.LineBulkEditView.as_view(), name='line_bulk_edit'),
+    # path(r'devices/<int:pk>/lines/delete/', views.LineBulkDeleteView.as_view(), name='line_bulk_delete'),
+    path(r'lines/<int:pk>/', views.LineView.as_view(), name='line'),
+    path(r'lines/<int:pk>/edit/', views.LineEditView.as_view(), name='line_edit'),
+    path(r'lines/<int:pk>/delete/', views.LineDeleteView.as_view(), name='line_delete'),
+    # path(r'lines/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name='line_changelog', kwargs={'model': Line}),
+    # path(r'lines/rename/', views.LineBulkRenameView.as_view(), name='line_bulk_rename'),
+    # path(r'lines/disconnect/', views.LineBulkDisconnectView.as_view(), name='line_bulk_disconnect'),
 ]

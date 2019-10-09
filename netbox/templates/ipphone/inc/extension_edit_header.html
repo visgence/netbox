@@ -4,7 +4,7 @@
     <li role="presentation"{% if active_tab == 'add' %} class="active"{% endif %}>
         <a href="{% url 'ipphone:extension_add' %}{% querystring request %}">New Number</a>
     </li>
-    {% if 'interface' in request.GET %}
+    {% if 'line' in request.GET %}
         <li role="presentation"{% if active_tab == 'assign' %} class="active"{% endif %}>
             <a href="{% url 'ipphone:extension_assign' %}{% querystring request %}">Assign Number</a>
         </li>

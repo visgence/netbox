@@ -85,8 +85,8 @@
                 <tr>
                     <td>Assignment</td>
                     <td>
-                        {% if extension.interface %}
-                            <span><a href="{{ extension.interface.parent.get_absolute_url }}">{{ extension.interface.parent }}</a> ({{ extension.interface }})</span>
+                        {% if extension.line %}
+                            <span><a href="{{ extension.line.parent.get_absolute_url }}">{{ extension.line.parent }}</a> ({{ extension.line }})</span>
                         {% else %}
                             <span class="text-muted">&mdash;</span>
                         {% endif %}

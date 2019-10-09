@@ -1,0 +1,135 @@
+{% load helpers %}
+<tr class="line" id="line_{{ iface.name }}">
+
+    {# Checkbox #}
+    {% if perms.ipphone.change_line or perms.ipphone.delete_line %}
+        <td class="pk">
+            <input name="pk" type="checkbox" value="{{ iface.pk }}" />
+        </td>
+    {% endif %}
+
+    {# Icon and name #}
+    <td class="text-nowrap">
+        <span title="{{ iface.get_type_display }}">
+            <i class="fa fa-fw"></i>
+            <a href="{{ iface.get_absolute_url }}">{{ iface }}</a>
+        </span>
+    </td>
+
+    {# tags #}
+    <td>
+        {% for tag in iface.tags.all %}
+            {% tag tag %}
+        {% empty %}
+            {% if not iface.tags %}&mdash;{% endif %}
+        {% endfor %}
+    </td>
+    {% if iface %}
+        <td colspan="2">
+            <span class="text-muted"></span>
+        </td>
+    {% else %}
+        <td colspan="2">
+            <span class="text-muted">Not connected</span>
+        </td>
+    {% endif %}
+
+    {# Buttons #}
+    <td class="text-right text-nowrap noprint">
+        {% if show_line_graphs %}
+            {% if iface.connected_endpoint %}
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#graphs_modal" data-obj="{{ device.name }} - {{ iface.name }}" data-url="{% url 'ipphone-api:line-graphs' pk=iface.pk %}" title="Show graphs">
+                    <i class="glyphicon glyphicon-signal" aria-hidden="true"></i>
+                </button>
+            {% endif %}
+        {% endif %}
+        {% if perms.ipphone.add_extension %}
+            <a href="{% url 'ipphone:extension_add' %}?line={{ iface.pk }}&return_url={{ device.get_absolute_url }}" class="btn btn-xs btn-success" title="Add Extension">
+                <i class="glyphicon glyphicon-earphone" aria-hidden="true"></i>
+            </a>
+        {% endif %}
+        {% if perms.ipphone.change_line %}
+            <a href="{% if iface.device_id %}{% url 'ipphone:line_edit' pk=iface.pk %}{% endif %}?return_url={{ device.get_absolute_url }}" class="btn btn-info btn-xs" title="Edit line">
+                <i class="glyphicon glyphicon-pencil" aria-hidden="true"></i>
+            </a>
+        {% endif %}
+        {% if perms.ipphone.delete_line %}
+            <a href="{% if iface.device_id %}{% url 'ipphone:line_delete' pk=iface.pk %}{% endif %}?return_url={{ device.get_absolute_url }}" class="btn btn-danger btn-xs" title="Delete line">
+                <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+            </a>
+        {% endif %}
+    </td>
+</tr>
+
+{% with extensions=iface.extension.all %}
+    {% if extensions %}
+        <tr class="extensions">
+            {# Placeholder #}
+            {% if perms.ipphone.change_line or perms.ipphone.delete_line %}
+                <td></td>
+            {% endif %}
+
+            {# Extension table #}
+            <td colspan="9" style="padding: 0">
+                <table class="table table-condensed line-ips">
+                    <thead>
+                        <tr class="text-muted">
+                            <th class="col-md-3">Extension</th>
+                            <th class="col-md-2">Status</th>
+                            <th class="col-md-3">Partition</th>
+                            <th class="col-md-3">Description</th>
+                            <th class="col-md-1"></th>
+                        </tr>
+                    </thead>
+                    {% for ph in iface.extension.all %}
+                        <tr>
+
+                            {# Extension #}
+                            <td>
+                                <a href="{% url 'ipphone:extension' pk=ph.pk %}">{{ ph }}</a>
+                            </td>
+
+                            {# status #}
+                            <td>
+                                <span class="label label-{{ ph.get_status_class }}">{{ ph.get_status_display }}</span>
+                            </td>
+
+                            {# Partition #}
+                            <td>
+                                {% if ph.partition %}
+                                    <a href="{% url 'ipphone:partitions' pk=ph.partition.pk %}">{{ ph.partition.name }}</a>
+                                {% else %}
+                                    <span class="text-muted">Global</span>
+                                {% endif %}
+                            </td>
+
+                            {# Description #}
+                            <td>
+                                {% if ph.description %}
+                                    {{ ph.description }}
+                                {% else %}
+                                    <span class="text-muted">&mdash;</span>
+                                {% endif %}
+                            </td>
+
+                            {# Buttons #}
+                            <td class="text-right text-nowrap noprint">
+                                {% if perms.ipphone.change_extension %}
+                                    <a href="{% url 'ipphone:extension_edit' pk=ph.pk %}?return_url={{ device.get_absolute_url }}" class="btn btn-info btn-xs">
+                                        <i class="glyphicon glyphicon-pencil" aria-hidden="true" title="Edit Extension"></i>
+                                    </a>
+                                {% endif %}
+                                {% if perms.ipphone.delete_extension %}
+                                    <a href="{% url 'ipphone:extension_delete' pk=ph.pk %}?return_url={{ device.get_absolute_url }}" class="btn btn-danger btn-xs">
+                                        <i class="glyphicon glyphicon-trash" aria-hidden="true" title="Delete Extension"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+    {% endif %}
+{% endwith %}

@@ -20,8 +20,12 @@ router.register(r'_choices', views.IPPHONEFieldChoicesViewSet, basename='field-c
 # Partitions
 router.register(r'partitions', views.PartitionViewSet)
 
-# IP addresses
-router.register(r'dn', views.ExtensionViewSet)
+# Extensions
+router.register(r'extension', views.ExtensionViewSet)
+# router.register(r'dn', views.ExtensionViewSet)
+
+# Lines
+router.register(r'lines', views.LineViewSet)
 
 app_name = 'ipphone-api'
 urlpatterns = router.urls

@@ -52,6 +52,7 @@
                     {% if perms.dcim.add_powerport %}<li><a href="{% url 'dcim:powerport_add' pk=device.pk %}">Power Ports</a></li>{% endif %}
                     {% if perms.dcim.add_poweroutlet %}<li><a href="{% url 'dcim:poweroutlet_add' pk=device.pk %}">Power Outlets</a></li>{% endif %}
                     {% if perms.dcim.add_interface %}<li><a href="{% url 'dcim:interface_add' pk=device.pk %}">Interfaces</a></li>{% endif %}
+                    {% if perms.ipphone.add_line %}<li><a href="{% url 'ipphone:line_add' pk=device.pk %}">Lines</a></li>{% endif %}
                     {% if perms.dcim.add_frontport %}<li><a href="{% url 'dcim:frontport_add' pk=device.pk %}">Front Ports</a></li>{% endif %}
                     {% if perms.dcim.add_rearport %}<li><a href="{% url 'dcim:rearport_add' pk=device.pk %}">Rear Ports</a></li>{% endif %}
                     {% if perms.dcim.add_devicebay %}<li><a href="{% url 'dcim:devicebay_add' pk=device.pk %}">Device Bays</a></li>{% endif %}
@@ -609,6 +610,52 @@
                      </div>
                 </div>
                 {% if perms.dcim.delete_interface %}
+                    </form>
+                {% endif %}
+            {% endif %}
+            {% if lines %}
+                {% if perms.ipphone.change_line or perms.ipphone.delete_line %}
+                    <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="device" value="{{ device.pk }}" />
+                {% endif %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Lines</strong>
+                        <div class="pull-right noprint">
+                            <button class="btn btn-default btn-xs toggle-ips" selected="selected">
+                                <span class="glyphicon glyphicon-check" aria-hidden="true"></span> Show IPs / Extensions
+                            </button>
+                        </div>
+                    </div>
+                    <table id="lines_table" class="table table-hover table-headings panel-body component-list">
+                        <thead>
+                            <tr>
+                                {% if perms.ipphone.change_line or perms.ipphone.delete_line %}
+                                    <th class="pk"><input type="checkbox" class="toggle" title="Toggle all" /></th>
+                                {% endif %}
+                                <th>Name</th>
+                                <th>Connection</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for iface in lines %}
+                                {% include 'ipphone/inc/line.html' %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="panel-footer noprint">
+                        {% if perms.ipphone.add_line %}
+                            <div class="pull-right">
+                                <a href="{% url 'ipphone:line_add' pk=device.pk %}" class="btn btn-primary btn-xs">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add lines
+                                </a>
+                            </div>
+                            <div class="clearfix"></div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if perms.ipphone.delete_line %}
                     </form>
                 {% endif %}
             {% endif %}

@@ -3,16 +3,16 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.validators import MaxValueValidator, MinValueValidator
 from taggit.forms import TagField
 
-from dcim.models import Site, Rack, Device, Interface
+from dcim.models import Site, Rack, Device
 from extras.forms import AddRemoveTagsForm, CustomFieldForm, CustomFieldBulkEditForm, CustomFieldFilterForm
 from utilities.forms import (
     add_blank_choice, APISelect, APISelectMultiple, BootstrapMixin, BulkEditNullBooleanSelect, ChainedModelChoiceField,
     CSVChoiceField, ExpandableExtensionField, FilterChoiceField, FlexibleModelChoiceField, ReturnURLForm, SlugField,
-    StaticSelect2, StaticSelect2Multiple, BOOLEAN_WITH_BLANK_CHOICES
+    StaticSelect2, StaticSelect2Multiple, BOOLEAN_WITH_BLANK_CHOICES, ComponentForm, ExpandableNameField
 )
 from virtualization.models import VirtualMachine
 from .constants import EXTENSION_STATUS_CHOICES
-from .models import Extension, Partition
+from .models import Extension, Partition, Line
 
 
 #
@@ -74,8 +74,8 @@ class PartitionFilterForm(BootstrapMixin, CustomFieldFilterForm):
 #
 
 class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
-    interface = forms.ModelChoiceField(
-        queryset=Interface.objects.all(),
+    line = forms.ModelChoiceField(
+        queryset=Line.objects.all(),
         required=False
     )
     site = forms.ModelChoiceField(
@@ -111,7 +111,7 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
     class Meta:
         model = Extension
         fields = [
-            'dn', 'partition', 'status', 'description', 'interface', 'site', 'tags',
+            'dn', 'partition', 'status', 'description', 'line', 'site', 'tags',
         ]
         widgets = {
             'status': StaticSelect2()
@@ -132,16 +132,16 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
 
         self.fields['partition'].empty_label = 'Global'
 
-        # Limit interface selections to those belonging to the parent device/VM
-        if self.instance and self.instance.interface:
-            self.fields['interface'].queryset = Interface.objects.filter(
-                device=self.instance.interface.device
+        # Limit line selections to those belonging to the parent device
+        if self.instance and self.instance.line:
+            self.fields['line'].queryset = Line.objects.filter(
+                device=self.instance.line.device
             )
         else:
-            self.fields['interface'].choices = []
+            self.fields['line'].choices = []
 
-        if self.instance.pk and self.instance.interface is not None:
-            parent = self.instance.interface.parent
+        if self.instance.pk and self.instance.line is not None:
+            parent = self.instance.line.parent
 
     def clean(self):
         super().clean()
@@ -151,8 +151,8 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
         extension = super().save(*args, **kwargs)
 
         # Assign/clear this Extension as the primary for the associated Device.
-        if self.cleaned_data['interface']:
-            parent = self.cleaned_data['interface'].parent
+        if self.cleaned_data['line']:
+            parent = self.cleaned_data['line'].parent
             parent.save()
 
 
@@ -197,8 +197,8 @@ class ExtensionCSVForm(forms.ModelForm):
             'invalid_choice': 'Device not found.',
         }
     )
-    interface_name = forms.CharField(
-        help_text='Name of assigned interface',
+    line_name = forms.CharField(
+        help_text='Name of assigned line',
         required=False
     )
     partition = FlexibleModelChoiceField(
@@ -220,30 +220,30 @@ class ExtensionCSVForm(forms.ModelForm):
         super().clean()
 
         device = self.cleaned_data.get('device')
-        interface_name = self.cleaned_data.get('interface_name')
+        line_name = self.cleaned_data.get('line_name')
 
-        # Validate interface
-        if interface_name and device:
+        # Validate line
+        if line_name and device:
             try:
-                self.instance.interface = Interface.objects.get(device=device, name=interface_name)
-            except Interface.DoesNotExist:
-                raise forms.ValidationError("Invalid interface {} for device {}".format(
-                    interface_name, device
+                self.instance.line = Line.objects.get(device=device, name=line_name)
+            except Line.DoesNotExist:
+                raise forms.ValidationError("Invalid line {} for device {}".format(
+                    line_name, device
                 ))
-        elif interface_name:
-            raise forms.ValidationError("Interface given ({}) but parent device not specified".format(
-                interface_name
+        elif line_name:
+            raise forms.ValidationError("Line given ({}) but parent device not specified".format(
+                line_name
             ))
         elif device:
-            raise forms.ValidationError("Device specified ({}) but interface missing".format(device))
+            raise forms.ValidationError("Device specified ({}) but line missing".format(device))
 
     def save(self, *args, **kwargs):
 
-        # Set interface
-        if self.cleaned_data['device'] and self.cleaned_data['interface_name']:
-            self.instance.interface = Interface.objects.get(
+        # Set line
+        if self.cleaned_data['device'] and self.cleaned_data['line_name']:
+            self.instance.line = Line.objects.get(
                 device=self.cleaned_data['device'],
-                name=self.cleaned_data['interface_name']
+                name=self.cleaned_data['line_name']
             )
 
         dn = super().save(*args, **kwargs)
@@ -302,3 +302,45 @@ class ExtensionFilterForm(BootstrapMixin, CustomFieldFilterForm):
         widget=StaticSelect2Multiple()
     )
 
+
+#
+# Lines
+#
+
+class LineForm(BootstrapMixin, forms.ModelForm):
+    tags = TagField(
+        required=False
+    )
+
+    class Meta:
+        model = Line
+        fields = [
+            'device', 'name'
+        ]
+        widgets = {
+            'device': forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+
+class LineCreateForm(ComponentForm, forms.Form):
+    name_pattern = ExpandableNameField(
+        label='Name'
+    )
+    tags = TagField(
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+
+        # Set lines enabled by default
+        kwargs['initial'] = kwargs.get('initial', {}).copy()
+        kwargs['initial'].update({'enabled': True})
+
+        super().__init__(*args, **kwargs)
+
+
+ 

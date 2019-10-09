@@ -2,6 +2,7 @@ from django.urls import path
 
 from extras.views import ObjectChangeLogView, ImageAttachmentEditView
 from ipam.views import ServiceCreateView
+from ipphone.views import Extension, Partition, Line, LineCreateView
 from secrets.views import secret_add
 from . import views
 from .models import (
@@ -214,6 +215,9 @@ urlpatterns = [
     path(r'interfaces/<int:pk>/trace/', views.CableTraceView.as_view(), name='interface_trace', kwargs={'model': Interface}),
     path(r'interfaces/rename/', views.InterfaceBulkRenameView.as_view(), name='interface_bulk_rename'),
     path(r'interfaces/disconnect/', views.InterfaceBulkDisconnectView.as_view(), name='interface_bulk_disconnect'),
+
+    # Lines
+    # path(r'devices/<int:pk>/lines/add/', views.LineCreateView.as_view(), name='line_add'),
 
     # Front ports
     # path(r'devices/front-ports/add/', views.DeviceBulkAddFrontPortView.as_view(), name='device_bulk_add_frontport'),

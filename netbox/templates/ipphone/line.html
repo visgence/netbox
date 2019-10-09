@@ -1,0 +1,72 @@
+{% extends '_base.html' %}
+{% load helpers %}
+
+{% block header %}
+    <div class="row noprint">
+        <div class="col-md-12">
+            <ol class="breadcrumb">
+                {% if line.device %}
+                    <li><a href="{% url 'ipphone:device_list' %}">Devices</a></li>
+                {% else %}
+                    <li><a href="{% url 'virtualization:virtualmachine_list' %}">Virtual Machines</a></li>
+                {% endif %}
+                <li><a href="{{ line.parent.get_absolute_url }}">{{ line.parent }}</a></li>
+                <li>{{ line }}</li>
+            </ol>
+        </div>
+    </div>
+    <div class="pull-right noprint">
+        {% if perms.ipphone.change_line %}
+            <a href="{% if line.device %}{% url 'ipphone:line_edit' pk=line.pk %}{% else %}{% url 'virtualization:line_edit' pk=line.pk %}{% endif %}" class="btn btn-warning">
+                <span class="fa fa-pencil" aria-hidden="true"></span> Edit this line
+            </a>
+        {% endif %}
+        {% if perms.ipphone.delete_line %}
+            <a href="{% if line.device %}{% url 'ipphone:line_delete' pk=line.pk %}{% else %}{% url 'virtualization:line_delete' pk=line.pk %}{% endif %}" class="btn btn-danger">
+                <span class="fa fa-trash" aria-hidden="true"></span> Delete this line
+            </a>
+        {% endif %}
+    </div>
+    <h1>{% block title %}{{ line.parent }} / {{ line.name }}{% endblock %}</h1>
+    <ul class="nav nav-tabs">
+        <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
+            <a href="{{ line.get_absolute_url }}">Interface</a>
+        </li>
+        {% if perms.extras.view_objectchange %}
+            <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
+                <a href="{% url 'ipphone:line_changelog' pk=line.pk %}">Changelog</a>
+            </li>
+        {% endif %}
+    </ul>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Interface</strong>
+            </div>
+            <table class="table table-hover panel-body attr-table">
+                <tr>
+                    <td>{% if line.device %}Device{% endif %}</td>
+                    <td>
+                        <a href="{{ line.parent.get_absolute_url }}">{{ line.parent }}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Name</td>
+                    <td>{{ line.name }}</td>
+                </tr>
+            </table>
+        </div>
+        {% include 'extras/inc/tags_panel.html' with tags=line.tags.all %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        {% include 'panel_table.html' with table=extension_table heading="Extensions" %}
+    </div>
+</div>
+
+{% endblock %}

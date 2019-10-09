@@ -9,7 +9,7 @@ from django.db.models.expressions import RawSQL
 from django.urls import reverse
 from taggit.managers import TaggableManager
 
-from dcim.models import Interface
+from dcim.models import Device
 from extras.models import CustomFieldModel, ObjectChange, TaggedItem
 from utilities.models import ChangeLoggedModel
 from utilities.utils import serialize_object
@@ -26,7 +26,8 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
 
     dn = models.CharField(
         max_length=25,
-        help_text='Extension'
+        help_text='Extension',
+        verbose_name='Extension'
     )
     partition = models.ForeignKey(
         to='ipphone.Partition',
@@ -41,8 +42,8 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
         verbose_name='Status',
         help_text='The operational status of this DN'
     )
-    interface = models.ForeignKey(
-        to='dcim.Interface',
+    line = models.ForeignKey(
+        to='ipphone.Line',
         on_delete=models.CASCADE,
         related_name='extension',
         blank=True,
@@ -62,13 +63,13 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
     tags = TaggableManager(through=TaggedItem)
 
     csv_headers = [
-        'dn', 'partition', 'status', 'device', 'interface_name', 'description',
+        'dn', 'partition', 'status', 'device', 'line_name', 'description',
     ]
 
     class Meta:
         ordering = ['id', 'dn', 'partition']
-        verbose_name = 'DN'
-        verbose_name_plural = 'DNs'
+        verbose_name = 'Extension'
+        verbose_name_plural = 'Extensions'
 
     def __str__(self):
         return str(self.dn)
@@ -98,9 +99,9 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
         super().save(*args, **kwargs)
 
     def to_objectchange(self, action):
-        # Annotate the assigned Interface (if any)
+        # Annotate the assigned Line (if any)
         try:
-            parent_obj = self.interface
+            parent_obj = self.line
         except ObjectDoesNotExist:
             parent_obj = None
 
@@ -117,15 +118,15 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
             self.dn,
             self.get_status_display(),
             self.device.identifier if self.device else None,
-            self.interface.name if self.interface else None,
+            self.line.name if self.line else None,
             self.description,
             self.partition,
         )
 
     @property
     def device(self):
-        if self.interface:
-            return self.interface.device
+        if self.line:
+            return self.line.device
         return None
 
     def get_status_class(self):
@@ -182,3 +183,49 @@ class Partition(ChangeLoggedModel, CustomFieldModel):
     @property
     def display_name(self):
         return self.name
+
+
+class LineManager(models.Manager):
+    def search(self):
+        sql_col = '{}.name'.format(self.model._meta.db_table)
+        ordering = [
+            'name', 'pk'
+        ]
+        return Line.objects.all().order_by(*ordering)
+
+
+class Line(models.Model):
+    device = models.ForeignKey(
+        to='dcim.Device',
+        on_delete=models.CASCADE,
+        related_name='lines',
+        null=True,
+        blank=True
+    )
+    name = models.CharField(
+        max_length=64
+    )
+
+    objects = LineManager()
+    tags = TaggableManager(through=TaggedItem)
+
+    csv_headers = [
+        'device', 'name'
+    ]
+
+    class Meta:
+        ordering = ['device', 'name']
+        unique_together = ['device', 'name']
+        verbose_name = 'Line'
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('ipphone:line', kwargs={'pk': self.pk})
+
+    def to_csv(self):
+        return (
+            self.device.identifier if self.device else None,
+            self.name,
+        )
