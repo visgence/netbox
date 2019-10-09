@@ -9,7 +9,7 @@ from django.db.models.expressions import RawSQL
 from django.urls import reverse
 from taggit.managers import TaggableManager
 
-from dcim.models import Device
+from dcim.models import Device, ComponentModel
 from extras.models import CustomFieldModel, ObjectChange, TaggedItem
 from utilities.models import ChangeLoggedModel
 from utilities.utils import serialize_object
@@ -194,7 +194,7 @@ class LineManager(models.Manager):
         return Line.objects.all().order_by(*ordering)
 
 
-class Line(models.Model):
+class Line(ComponentModel):
     device = models.ForeignKey(
         to='dcim.Device',
         on_delete=models.CASCADE,
@@ -216,7 +216,6 @@ class Line(models.Model):
     class Meta:
         ordering = ['device', 'name']
         unique_together = ['device', 'name']
-        verbose_name = 'Line'
 
     def __str__(self):
         return self.name
