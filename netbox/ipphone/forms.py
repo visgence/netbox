@@ -315,7 +315,7 @@ class LineForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = Line
         fields = [
-            'device', 'name'
+            'device', 'name', 'description'
         ]
         widgets = {
             'device': forms.HiddenInput(),

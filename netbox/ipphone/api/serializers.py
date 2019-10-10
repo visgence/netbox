@@ -34,7 +34,7 @@ class PartitionSerializer(TaggitSerializer, CustomFieldModelSerializer):
 #
 
 class ExtensionLineSerializer(WritableNestedSerializer):
-    url = serializers.SerializerMethodField() 
+    # url = serializers.SerializerMethodField() 
     device = NestedDeviceSerializer(read_only=True)
 
     class Meta:
