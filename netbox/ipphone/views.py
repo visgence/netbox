@@ -228,7 +228,7 @@ class LineView(PermissionRequiredMixin, View):
         line = get_object_or_404(Line, pk=pk)
 
         # Get assigned Extension
-        extension_table = LineExtensionTable(
+        extension_table = tables.LineExtensionTable(
             data=line.extension.prefetch_related('partition'),
             orderable=False
         )
@@ -248,12 +248,18 @@ class LineCreateView(PermissionRequiredMixin, ComponentCreateView):
     template_name = 'ipphone/device_component_add.html'
 
 class LineEditView(PermissionRequiredMixin, ObjectEditView):
-    permission_required = 'dcim.change_line'
+    permission_required = 'ipphone.change_line'
     model = Line
     model_form = forms.LineForm
-    template_name = 'dcim/line_edit.html'
+    template_name = 'ipphone/line_edit.html'
 
 class LineDeleteView(PermissionRequiredMixin, ObjectDeleteView):
     permission_required = 'ipphone.delete_line'
     model = Line
 
+
+class LineBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
+    permission_required = 'ipphone.delete_line'
+    queryset = Line.objects.all()
+    parent_model = Device
+    table = tables.LineTable

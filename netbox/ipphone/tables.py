@@ -80,18 +80,6 @@ class ExtensionAssignTable(BaseTable):
         orderable = False
 
 
-class LineExtensionTable(BaseTable):
-    """
-    List Extension assigned to a specific Line.
-    """
-    dn = tables.TemplateColumn(EXTENSION_ASSIGN_LINK, verbose_name='DN')
-    status = tables.TemplateColumn(STATUS_LABEL)
-
-    class Meta(BaseTable.Meta):
-        model = Extension
-        fields = ('dn', 'partition', 'status', 'description')
-
-
 #
 # Partitions
 #
@@ -105,11 +93,16 @@ class PartitionTable(BaseTable):
         fields = ('pk', 'name', 'description', 'enforce_unique')
 
 
-
-
 #
 # Lines
 #
+
+class LineTable(BaseTable):
+
+    class Meta(BaseTable.Meta):
+        model = Line
+        fields = ('name', 'description')
+
 
 class LineExtensionTable(BaseTable):
     """

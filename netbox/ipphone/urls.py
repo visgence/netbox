@@ -36,11 +36,11 @@ urlpatterns = [
     path(r'devices/lines/add/', DeviceBulkAddLineView.as_view(), name='device_bulk_add_line'),
     path(r'devices/<int:pk>/lines/add/', views.LineCreateView.as_view(), name='line_add'),
     # path(r'devices/<int:pk>/lines/edit/', views.LineBulkEditView.as_view(), name='line_bulk_edit'),
-    # path(r'devices/<int:pk>/lines/delete/', views.LineBulkDeleteView.as_view(), name='line_bulk_delete'),
+    path(r'devices/<int:pk>/lines/delete/', views.LineBulkDeleteView.as_view(), name='line_bulk_delete'),
     path(r'lines/<int:pk>/', views.LineView.as_view(), name='line'),
     path(r'lines/<int:pk>/edit/', views.LineEditView.as_view(), name='line_edit'),
     path(r'lines/<int:pk>/delete/', views.LineDeleteView.as_view(), name='line_delete'),
-    # path(r'lines/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name='line_changelog', kwargs={'model': Line}),
+    path(r'lines/<int:pk>/changelog/', ObjectChangeLogView.as_view(), name='line_changelog', kwargs={'model': Line}),
     # path(r'lines/rename/', views.LineBulkRenameView.as_view(), name='line_bulk_rename'),
     # path(r'lines/disconnect/', views.LineBulkDisconnectView.as_view(), name='line_bulk_disconnect'),
 ]

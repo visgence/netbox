@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <ol class="breadcrumb">
                 {% if line.device %}
-                    <li><a href="{% url 'ipphone:device_list' %}">Devices</a></li>
+                    <li><a href="{% url 'dcim:device_list' %}">Devices</a></li>
                 {% else %}
                     <li><a href="{% url 'virtualization:virtualmachine_list' %}">Virtual Machines</a></li>
                 {% endif %}

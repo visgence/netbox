@@ -22,7 +22,6 @@ from extras.views import ObjectConfigContextView
 from ipam.models import Prefix, VLAN
 from ipam.tables import InterfaceIPAddressTable, InterfaceVLANTable
 from ipphone.models import Line
-from ipphone.tables import LineExtensionTable
 from utilities.forms import ConfirmationForm
 from utilities.paginator import EnhancedPaginator
 from utilities.utils import csv_format
@@ -1659,7 +1658,7 @@ class DeviceBulkAddInterfaceView(PermissionRequiredMixin, BulkComponentCreateVie
     default_return_url = 'dcim:device_list'
 
 
-### FIX 
+### FIX Below
 
 
 class DeviceBulkAddLineView(PermissionRequiredMixin, BulkComponentCreateView):

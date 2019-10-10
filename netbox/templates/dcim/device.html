@@ -645,6 +645,11 @@
                         </tbody>
                     </table>
                     <div class="panel-footer noprint">
+                        {% if lines and perms.ipphone.delete_line %}
+                            <button type="submit" name="_delete" formaction="{% url 'ipphone:line_bulk_delete' pk=device.pk %}?return_url={{ device.get_absolute_url }}" class="btn btn-danger btn-xs">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+                            </button>
+                        {% endif %}
                         {% if perms.ipphone.add_line %}
                             <div class="pull-right">
                                 <a href="{% url 'ipphone:line_add' pk=device.pk %}" class="btn btn-primary btn-xs">
