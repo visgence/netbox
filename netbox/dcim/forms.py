@@ -34,6 +34,7 @@ from .models import (
     InventoryItem, Platform, PowerFeed, PowerOutlet, PowerOutletTemplate, PowerPanel, PowerPort, PowerPortTemplate,
     Rack, RackGroup, RackReservation, RackRole, RearPort, RearPortTemplate, Region, Site, VirtualChassis,
 )
+from ipphone.models import Line
 
 DEVICE_BY_PK_RE = r'{\d+\}'
 
@@ -931,6 +932,13 @@ class DeviceTypeFilterForm(BootstrapMixin, CustomFieldFilterForm):
     interfaces = forms.NullBooleanField(
         required=False,
         label='Has interfaces',
+        widget=StaticSelect2(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
+    )
+    line = forms.NullBooleanField(
+        required=False,
+        label='Has lines',
         widget=StaticSelect2(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
@@ -1849,6 +1857,13 @@ class DeviceFilterForm(BootstrapMixin, LocalConfigContextFilterForm, TenancyFilt
     interfaces = forms.NullBooleanField(
         required=False,
         label='Has interfaces',
+        widget=StaticSelect2(
+            choices=BOOLEAN_WITH_BLANK_CHOICES
+        )
+    )
+    line = forms.NullBooleanField(
+        required=False,
+        label='Has lines',
         widget=StaticSelect2(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )

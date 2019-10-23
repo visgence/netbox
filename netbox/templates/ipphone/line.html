@@ -7,8 +7,6 @@
             <ol class="breadcrumb">
                 {% if line.device %}
                     <li><a href="{% url 'dcim:device_list' %}">Devices</a></li>
-                {% else %}
-                    <li><a href="{% url 'virtualization:virtualmachine_list' %}">Virtual Machines</a></li>
                 {% endif %}
                 <li><a href="{{ line.parent.get_absolute_url }}">{{ line.parent }}</a></li>
                 <li>{{ line }}</li>
@@ -17,12 +15,12 @@
     </div>
     <div class="pull-right noprint">
         {% if perms.ipphone.change_line %}
-            <a href="{% if line.device %}{% url 'ipphone:line_edit' pk=line.pk %}{% else %}{% url 'virtualization:line_edit' pk=line.pk %}{% endif %}" class="btn btn-warning">
+            <a href="{% if line.device %}{% url 'ipphone:line_edit' pk=line.pk %}{% endif %}" class="btn btn-warning">
                 <span class="fa fa-pencil" aria-hidden="true"></span> Edit this line
             </a>
         {% endif %}
         {% if perms.ipphone.delete_line %}
-            <a href="{% if line.device %}{% url 'ipphone:line_delete' pk=line.pk %}{% else %}{% url 'virtualization:line_delete' pk=line.pk %}{% endif %}" class="btn btn-danger">
+            <a href="{% if line.device %}{% url 'ipphone:line_delete' pk=line.pk %}{% else %}{% endif %}" class="btn btn-danger">
                 <span class="fa fa-trash" aria-hidden="true"></span> Delete this line
             </a>
         {% endif %}
@@ -30,7 +28,7 @@
     <h1>{% block title %}{{ line.parent }} / {{ line.name }}{% endblock %}</h1>
     <ul class="nav nav-tabs">
         <li role="presentation"{% if not active_tab %} class="active"{% endif %}>
-            <a href="{{ line.get_absolute_url }}">Interface</a>
+            <a href="{{ line.get_absolute_url }}">Line</a>
         </li>
         {% if perms.extras.view_objectchange %}
             <li role="presentation"{% if active_tab == 'changelog' %} class="active"{% endif %}>
@@ -45,7 +43,7 @@
 	<div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <strong>Interface</strong>
+                <strong>Line</strong>
             </div>
             <table class="table table-hover panel-body attr-table">
                 <tr>

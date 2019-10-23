@@ -19,6 +19,7 @@ from .models import (
     PowerPortTemplate, Rack, RackGroup, RackReservation, RackRole, RearPort, RearPortTemplate, Region, Site,
     VirtualChassis,
 )
+from ipphone.models import Line
 
 
 class RegionFilter(NameSlugSearchFilterSet):
@@ -290,6 +291,10 @@ class DeviceTypeFilter(CustomFieldFilterSet):
         method='_interfaces',
         label='Has interfaces',
     )
+    line = django_filters.BooleanFilter(
+        method='line',
+        label='Has lines',
+    )
     pass_through_ports = django_filters.BooleanFilter(
         method='_pass_through_ports',
         label='Has pass-through ports',
@@ -326,6 +331,9 @@ class DeviceTypeFilter(CustomFieldFilterSet):
 
     def _interfaces(self, queryset, name, value):
         return queryset.exclude(interface_templates__isnull=value)
+
+    def _line(self, queryset, name, value):
+        return queryset.exclude(line_templates__isnull=value)
 
     def _pass_through_ports(self, queryset, name, value):
         return queryset.exclude(
@@ -557,6 +565,10 @@ class DeviceFilter(LocalConfigContextFilter, TenancyFilterSet, CustomFieldFilter
         method='_interfaces',
         label='Has interfaces',
     )
+    line = django_filters.BooleanFilter(
+        method='_line',
+        label='Has lines',
+    )
     pass_through_ports = django_filters.BooleanFilter(
         method='_pass_through_ports',
         label='Has pass-through ports',
@@ -565,7 +577,7 @@ class DeviceFilter(LocalConfigContextFilter, TenancyFilterSet, CustomFieldFilter
 
     class Meta:
         model = Device
-        fields = ['id', 'name', 'asset_tag', 'face', 'position', 'vc_position', 'vc_priority']
+        fields = ['id', 'name', 'asset_tag', 'face', 'position', 'vc_position', 'vc_priority', 'line']
 
     def search(self, queryset, name, value):
         if not value.strip():
@@ -607,6 +619,9 @@ class DeviceFilter(LocalConfigContextFilter, TenancyFilterSet, CustomFieldFilter
 
     def _interfaces(self, queryset, name, value):
         return queryset.exclude(interfaces__isnull=value)
+
+    def _line(self, queryset, name, value):
+        return queryset.exclude(line__isnull=value)
 
     def _pass_through_ports(self, queryset, name, value):
         return queryset.exclude(

@@ -24,7 +24,7 @@ from .constants import *
 from .exceptions import LoopDetected
 from .fields import ASNField, MACAddressField
 from .managers import InterfaceManager
-
+from ipphone.models import Line
 
 class ComponentTemplateModel(models.Model):
 
@@ -1736,9 +1736,9 @@ class Device(ChangeLoggedModel, ConfigContextModel, CustomFieldModel):
             Interface.objects.bulk_create(
                 [x.instantiate(self) for x in self.device_type.interface_templates.all()]
             )
-            # Line.objects.bulk_create(
-            #     [x.instantiate(self) for x in self.device_type.line_templates.all()]
-            # )
+            Line.objects.bulk_create(
+                [x.instantiate(self) for x in self.device_type.line_templates.all()]
+            )
             RearPort.objects.bulk_create(
                 [x.instantiate(self) for x in self.device_type.rearport_templates.all()]
             )

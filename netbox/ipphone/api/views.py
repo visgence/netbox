@@ -19,22 +19,10 @@ from utilities.api import (
     get_serializer_for_model, IsAuthenticatedOrLoginNotRequired, FieldChoicesViewSet, ModelViewSet, ServiceUnavailable,
 )
 from utilities.utils import get_subquery
-from virtualization.models import VirtualMachine
 from . import serializers
 
 from ipphone import filters
 from ipphone.models import Extension, Partition, Line
-
-#
-# Field choices
-#
-
-class IPPHONEFieldChoicesViewSet(FieldChoicesViewSet):
-    fields = (
-        (Extension, ['status']),
-        # (Partition, ['name', 'enforce_unique']),
-        # (Line, ['name', 'extension', 'device'])
-    )
 
 
 #
@@ -43,7 +31,7 @@ class IPPHONEFieldChoicesViewSet(FieldChoicesViewSet):
 
 class ExtensionViewSet(CustomFieldModelViewSet):
     queryset = Extension.objects.prefetch_related(
-        'line__device__device_type', 'tags'
+        'tags'
     )
     serializer_class = serializers.ExtensionSerializer
     filterset_class = filters.ExtensionFilter
@@ -62,20 +50,12 @@ class PartitionViewSet(CustomFieldModelViewSet):
 # Lines
 #
 
+
 class LineViewSet(ModelViewSet):
     queryset = Line.objects.prefetch_related(
-        'device', 'extension', 'tags'
+        'device', 'extensions'
+    ).filter(
+        device__isnull=False
     )
     serializer_class = serializers.LineSerializer
     filterset_class = filters.LineFilter
-
-    # @action(detail=True)
-    # def graphs(self, request, pk):
-    #     """
-    #     A convenience method for rendering graphs for a particular interface.
-    #     """
-    #     interface = get_object_or_404(Interface, pk=pk)
-    #     queryset = Graph.objects.filter(type=GRAPH_TYPE_INTERFACE)
-    #     serializer = RenderedGraphSerializer(queryset, many=True, context={'graphed_object': interface})
-    #     return Response(serializer.data)
-

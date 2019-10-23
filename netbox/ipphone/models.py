@@ -9,12 +9,60 @@ from django.db.models.expressions import RawSQL
 from django.urls import reverse
 from taggit.managers import TaggableManager
 
-from dcim.models import Device, ComponentModel
 from extras.models import CustomFieldModel, ObjectChange, TaggedItem
 from utilities.models import ChangeLoggedModel
 from utilities.utils import serialize_object
 from .constants import *
 
+
+class ComponentTemplateModel(models.Model):
+
+    class Meta:
+        abstract = True
+
+    def instantiate(self, device):
+        """
+        Instantiate a new component on the specified Device.
+        """
+        raise NotImplementedError()
+
+    def to_objectchange(self, action):
+        return ObjectChange(
+            changed_object=self,
+            object_repr=str(self),
+            action=action,
+            related_object=self.device_type,
+            object_data=serialize_object(self)
+        )
+
+class ComponentModel(models.Model):
+    description = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    class Meta:
+        abstract = True
+
+    def to_objectchange(self, action):
+        # Annotate the parent Device/VM
+        try:
+            parent = getattr(self, 'device', None) or getattr(self, 'virtual_machine', None)
+        except ObjectDoesNotExist:
+            # The parent device/VM has already been deleted
+            parent = None
+
+        return ObjectChange(
+            changed_object=self,
+            object_repr=str(self),
+            action=action,
+            related_object=parent,
+            object_data=serialize_object(self)
+        )
+
+    @property
+    def parent(self):
+        return getattr(self, 'device', None)
 
 class ExtensionManager(models.Manager):
 
@@ -23,7 +71,6 @@ class ExtensionManager(models.Manager):
 
 
 class Extension(ChangeLoggedModel, CustomFieldModel):
-
     dn = models.CharField(
         max_length=25,
         help_text='Extension',
@@ -42,13 +89,6 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
         verbose_name='Status',
         help_text='The operational status of this DN'
     )
-    line = models.ForeignKey(
-        to='ipphone.Line',
-        on_delete=models.CASCADE,
-        related_name='extension',
-        blank=True,
-        null=True
-    )
     description = models.CharField(
         max_length=100,
         blank=True
@@ -63,7 +103,7 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
     tags = TaggableManager(through=TaggedItem)
 
     csv_headers = [
-        'dn', 'partition', 'status', 'device', 'line_name', 'description',
+        'dn', 'partition', 'status', 'description',
     ]
 
     class Meta:
@@ -83,7 +123,6 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
     def clean(self):
 
         if self.dn:
-
             # Enforce unique DN (if applicable)
             if self.partition and self.partition.enforce_unique:
                 duplicate_pns = self.get_duplicates()
@@ -99,17 +138,10 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
         super().save(*args, **kwargs)
 
     def to_objectchange(self, action):
-        # Annotate the assigned Line (if any)
-        try:
-            parent_obj = self.line
-        except ObjectDoesNotExist:
-            parent_obj = None
-
         return ObjectChange(
             changed_object=self,
             object_repr=str(self),
             action=action,
-            related_object=parent_obj,
             object_data=serialize_object(self)
         )
 
@@ -117,17 +149,9 @@ class Extension(ChangeLoggedModel, CustomFieldModel):
         return (
             self.dn,
             self.get_status_display(),
-            self.device.identifier if self.device else None,
-            self.line.name if self.line else None,
             self.description,
             self.partition,
         )
-
-    @property
-    def device(self):
-        if self.line:
-            return self.line.device
-        return None
 
     def get_status_class(self):
         return STATUS_CHOICE_CLASSES[self.status]
@@ -187,7 +211,6 @@ class Partition(ChangeLoggedModel, CustomFieldModel):
 
 class LineManager(models.Manager):
     def search(self):
-        sql_col = '{}.name'.format(self.model._meta.db_table)
         ordering = [
             'name', 'pk'
         ]
@@ -198,24 +221,29 @@ class Line(ComponentModel):
     device = models.ForeignKey(
         to='dcim.Device',
         on_delete=models.CASCADE,
-        related_name='lines',
+        related_name='line',
         null=True,
         blank=True
+    )
+    extension = models.ForeignKey(
+        to='ipphone.Extension',
+        on_delete=models.SET_NULL,
+        related_name='device',
+        blank=True,
+        null=True
     )
     name = models.CharField(
         max_length=64
     )
-
     objects = LineManager()
     tags = TaggableManager(through=TaggedItem)
 
     csv_headers = [
-        'device', 'name'
+        'device', 'name', 'description', 'extension'
     ]
 
     class Meta:
-        ordering = ['device', 'name']
-        unique_together = ['device', 'name']
+        ordering = ['device', 'name', 'extension']
 
     def __str__(self):
         return self.name
@@ -227,4 +255,61 @@ class Line(ComponentModel):
         return (
             self.device.identifier if self.device else None,
             self.name,
+            self.description,
+            self.extension
         )
+
+    def save(self, *args, **kwargs):
+        return super().save(*args, **kwargs)
+
+    def to_objectchange(self, action):
+        # Annotate the parent Device
+        try:
+            parent_obj = self.extension
+        except ObjectDoesNotExist:
+            parent_obj = None
+
+        return ObjectChange(
+            changed_object=self,
+            object_repr=str(self),
+            action=action,
+            related_object=parent_obj,
+            object_data=serialize_object(self)
+        )
+
+    @property 
+    def parent(self):
+        return self.device
+
+    @property
+    def count_extensions(self):
+        return self.extension.count()
+
+
+class LineTemplate(ComponentTemplateModel):
+    """
+    A template for a physical data line on a new Device.
+    """
+    device_type = models.ForeignKey(
+        to='dcim.DeviceType',
+        on_delete=models.CASCADE,
+        related_name='line_templates'
+    )
+    name = models.CharField(
+        max_length=64
+    )
+
+    objects = LineManager()
+
+    class Meta:
+        ordering = ['device_type', 'name']
+
+    def __str__(self):
+        return self.name
+
+    def instantiate(self, device):
+        return Interface(
+            device=device,
+            name=self.name
+        )
+

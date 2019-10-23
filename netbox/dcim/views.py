@@ -921,7 +921,7 @@ class DeviceView(PermissionRequiredMixin, View):
     def get(self, request, pk):
 
         device = get_object_or_404(Device.objects.prefetch_related(
-            'site__region', 'rack__group', 'tenant__group', 'device_role', 'platform', 'lines'
+            'site__region', 'rack__group', 'tenant__group', 'device_role', 'platform', 'line'
         ), pk=pk)
 
         # VirtualChassis members
@@ -950,7 +950,7 @@ class DeviceView(PermissionRequiredMixin, View):
             'cable__termination_a', 'cable__termination_b', 'ip_addresses', 'tags'
         )
         # Lines
-        lines = device.lines.all()
+        lines = device.line.all()
 
         # Front ports
         front_ports = device.frontports.prefetch_related('rear_port', 'cable')

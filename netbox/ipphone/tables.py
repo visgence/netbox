@@ -24,12 +24,17 @@ EXTENSION_LINK = """
 """
 
 EXTENSION_ASSIGN_LINK = """
+<a href="{% url 'ipphone:extension_edit' pk=record.pk %}">{{ record }}</a>
+"""
+
+EXTENSION_ASSIGN_LINK2 = """
 <a href="{% url 'ipphone:extension_edit' pk=record.pk %}?line={{ request.GET.line }}&return_url={{ request.GET.return_url }}">{{ record }}</a>
 """
 
+
 EXTENSION_PARENT = """
 {% if record.line %}
-    <a href="{{ record.line.parent.get_absolute_url }}">{{ record.line.parent }}</a>
+    <a href="{{ record.line.parent.get_absolute_url }}">{{ record.line }}</a>
 {% else %}
     &mdash;
 {% endif %}
@@ -53,30 +58,28 @@ class ExtensionTable(BaseTable):
     dn = tables.TemplateColumn(EXTENSION_LINK, verbose_name='DN')
     partition = tables.TemplateColumn(PARTITION_LINK, verbose_name='Partition')
     status = tables.TemplateColumn(STATUS_LABEL)
-    line = tables.Column(orderable=False)
 
     class Meta(BaseTable.Meta):
         model = Extension
         fields = (
-            'pk', 'dn', 'partition', 'status', 'line', 'description',
+            'pk', 'dn', 'partition', 'status', 'description',
         )
 
 
 class ExtensionDetailTable(ExtensionTable):
     class Meta(ExtensionTable.Meta):
         fields = (
-            'pk', 'dn', 'partition', 'status', 'line', 'description',
+            'pk', 'dn', 'partition', 'status', 'description',
         )
 
 
 class ExtensionAssignTable(BaseTable):
-    dn = tables.TemplateColumn(EXTENSION_ASSIGN_LINK, verbose_name='DN')
+    dn = tables.TemplateColumn(EXTENSION_ASSIGN_LINK2, verbose_name='DN')
     status = tables.TemplateColumn(STATUS_LABEL)
-    line = tables.Column(orderable=False)
 
     class Meta(BaseTable.Meta):
         model = Extension
-        fields = ('dn', 'partition', 'status', 'line', 'description')
+        fields = ('dn', 'partition', 'status', 'description')
         orderable = False
 
 
@@ -101,7 +104,7 @@ class LineTable(BaseTable):
 
     class Meta(BaseTable.Meta):
         model = Line
-        fields = ('name', 'description')
+        fields = ('name', 'description', 'extension')
 
 
 class LineExtensionTable(BaseTable):
@@ -112,5 +115,5 @@ class LineExtensionTable(BaseTable):
     partition = tables.TemplateColumn(PARTITION_LINK, verbose_name='Partition')
 
     class Meta(BaseTable.Meta):
-        model = Line
+        model = Extension
         fields = ('extension', 'partition')

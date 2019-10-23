@@ -12,7 +12,6 @@ from ipphone.models import Extension, Partition, Line
 from utilities.api import (
     ChoiceField, SerializedPKRelatedField, ValidatedModelSerializer, WritableNestedSerializer,
 )
-from virtualization.api.nested_serializers import NestedVirtualMachineSerializer
 from .nested_serializers import *
 
 #
@@ -34,45 +33,38 @@ class PartitionSerializer(TaggitSerializer, CustomFieldModelSerializer):
 #
 
 class ExtensionLineSerializer(WritableNestedSerializer):
-    # url = serializers.SerializerMethodField() 
-    device = NestedDeviceSerializer(read_only=True)
-
+    url = serializers.SerializerMethodField() 
     class Meta:
-        model = Line
+        model = Extension
         fields = [
-            'id', 'device', 'name',
+            'id', 'dn', 'description', 'url'
         ]
 
     def get_url(self, obj):
-        url_name = 'ipphone-api:line-detail'
+        url_name = 'ipphone-api:extension-detail'
         return reverse(url_name, kwargs={'pk': obj.pk}, request=self.context['request'])
 
 
 class ExtensionSerializer(TaggitSerializer, CustomFieldModelSerializer):
-    status = ChoiceField(choices=EXTENSION_STATUS_CHOICES, required=False)
-    line = ExtensionLineSerializer(required=False, allow_null=True)
+    url = serializers.SerializerMethodField()
+    status = ChoiceField(choices=EXTENSION_STATUS_CHOICES)
     tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Extension
         fields = [
-            'id', 'partition', 'dn', 'status', 'line', 'description', 'tags', 'custom_fields', 'created', 'last_updated',
+            'id', 'partition', 'dn', 'status', 'description', 'tags', 'custom_fields', 'created', 'last_updated', 'url'
         ]
 
+    def get_url(self, obj):
+        url_name = 'ipphone-api:extension-detail'
+        return reverse(url_name, kwargs={'pk': obj.pk}, request=self.context['request'])
 
-class LineSerializer(TaggitSerializer):
-    device = NestedDeviceSerializer()
-    tags = TagListSerializerField(required=False)
+
+class LineSerializer(TaggitSerializer, CustomFieldModelSerializer):
+    extension = ExtensionLineSerializer(required=False, allow_null=True)
+    url = serializers.HyperlinkedIdentityField(view_name='ipphone-api:line-detail')
 
     class Meta:
         model = Line
-        fields = [
-            'id', 'device', 'name',  'tags', 'count_extensions',
-        ]
-
-    # TODO: This validation should be handled by Line.clean()
-    def validate(self, data):
-
-        # All associated VLANs be global or assigned to the parent device's site.
-        device = self.line.device if self.line else data.get('device')
-        
+        fields = ['id', 'name', 'extension', 'description', 'device', 'url']

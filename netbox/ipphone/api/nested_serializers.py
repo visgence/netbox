@@ -1,30 +1,13 @@
 from rest_framework import serializers
 
-from ipphone.models import Extension
+from ipphone.models import Extension, Partition, Line
 from utilities.api import WritableNestedSerializer
+from dcim.api.nested_serializers import NestedDeviceSerializer
 
 __all__ = [
     'NestedExtensionSerializer',
-    # 'NestedVRFSerializer',
+    'NestedLineSerializer',
 ]
-
-
-#
-# VRFs
-#
-
-# class NestedVRFSerializer(WritableNestedSerializer):
-#     url = serializers.HyperlinkedIdentityField(view_name='ipphone-api:vrf-detail')
-#     prefix_count = serializers.IntegerField(read_only=True)
-
-#     class Meta:
-#         model = VRF
-#         fields = ['id', 'url', 'name', 'rd', 'prefix_count']
-
-
-#
-# IP addresses
-#
 
 
 class NestedExtensionSerializer(WritableNestedSerializer):
@@ -32,4 +15,13 @@ class NestedExtensionSerializer(WritableNestedSerializer):
 
     class Meta:
         model = Extension
-        fields = ['id', 'partition', 'dn']
+        fields = ['id', 'partition', 'dn', 'url']
+
+
+class NestedLineSerializer(WritableNestedSerializer):
+    device = NestedDeviceSerializer(read_only=True)
+    url = serializers.HyperlinkedIdentityField(view_name='ipphone-api:line-detail')
+
+    class Meta:
+        model = Line
+        fields = ['id', 'name', 'description', 'device', 'url']

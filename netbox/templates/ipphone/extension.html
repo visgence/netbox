@@ -72,7 +72,7 @@
                     <td>Partition</td>
                     <td>
                         {% if extension.partition %}
-                            <span><a href="{{ extension.partition.parent.get_absolute_url }}">{{ extension.partition.parent }}</a> ({{ extension.partition }})</span>
+                            <span><a href="{{ extension.partition.parent.get_absolute_url }}">{{ extension.partition.parent }}</a></span>
                         {% else %}
                             <span class="text-muted">&mdash;</span>
                         {% endif %}
@@ -86,7 +86,7 @@
                     <td>Assignment</td>
                     <td>
                         {% if extension.line %}
-                            <span><a href="{{ extension.line.parent.get_absolute_url }}">{{ extension.line.parent }}</a> ({{ extension.line }})</span>
+                            <span><a href="{{ extension.line.parent.get_absolute_url }}">{{ extension.line.parent }}</a> - <a href="{{ extension.line.get_absolute_url }}edit/">({{ extension.line }})</a></span>
                         {% else %}
                             <span class="text-muted">&mdash;</span>
                         {% endif %}

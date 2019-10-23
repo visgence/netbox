@@ -8,43 +8,17 @@
         </td>
     {% endif %}
 
-    {# Icon and name #}
+    {# name #}
     <td class="text-nowrap">
         <span title="{{ iface.get_type_display }}">
-            <i class="fa fa-fw"></i>
             <a href="{{ iface.get_absolute_url }}">{{ iface }}</a>
         </span>
     </td>
 
-    {# tags #}
-    <td>
-        {% for tag in iface.tags.all %}
-            {% tag tag %}
-        {% empty %}
-            {% if not iface.tags %}&mdash;{% endif %}
-        {% endfor %}
-    </td>
-    {% if iface %}
-        <td colspan="2">
-            <span class="text-muted"></span>
-        </td>
-    {% else %}
-        <td colspan="2">
-            <span class="text-muted">Not connected</span>
-        </td>
-    {% endif %}
-
     {# Buttons #}
     <td class="text-right text-nowrap noprint">
-        {% if show_line_graphs %}
-            {% if iface.connected_endpoint %}
-                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#graphs_modal" data-obj="{{ device.name }} - {{ iface.name }}" data-url="{% url 'ipphone-api:line-graphs' pk=iface.pk %}" title="Show graphs">
-                    <i class="glyphicon glyphicon-signal" aria-hidden="true"></i>
-                </button>
-            {% endif %}
-        {% endif %}
         {% if perms.ipphone.add_extension %}
-            <a href="{% url 'ipphone:extension_add' %}?line={{ iface.pk }}&return_url={{ device.get_absolute_url }}" class="btn btn-xs btn-success" title="Add Extension">
+            <a href="{% url 'ipphone:extension_add' %}?device={{ device.pk }}&line={{ iface.pk }}&return_url={{ device.get_absolute_url }}" class="btn btn-xs btn-success" title="Add Extension">
                 <i class="glyphicon glyphicon-earphone" aria-hidden="true"></i>
             </a>
         {% endif %}
@@ -60,8 +34,7 @@
         {% endif %}
     </td>
 </tr>
-
-{% with extensions=iface.extension.all %}
+{% with extensions=iface.extension %}
     {% if extensions %}
         <tr class="extensions">
             {# Placeholder #}
@@ -81,7 +54,7 @@
                             <th class="col-md-1"></th>
                         </tr>
                     </thead>
-                    {% for ph in iface.extension.all %}
+                    {% with ph=extensions %}
                         <tr>
 
                             {# Extension #}
@@ -127,7 +100,7 @@
                             </td>
 
                         </tr>
-                    {% endfor %}
+                    {% endwith %}
                 </table>
             </td>
         </tr>

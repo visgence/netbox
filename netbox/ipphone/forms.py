@@ -10,7 +10,6 @@ from utilities.forms import (
     CSVChoiceField, ExpandableExtensionField, FilterChoiceField, FlexibleModelChoiceField, ReturnURLForm, SlugField,
     StaticSelect2, StaticSelect2Multiple, BOOLEAN_WITH_BLANK_CHOICES, ComponentForm, ExpandableNameField
 )
-from virtualization.models import VirtualMachine
 from .constants import EXTENSION_STATUS_CHOICES
 from .models import Extension, Partition, Line
 
@@ -78,83 +77,67 @@ class ExtensionForm(BootstrapMixin, ReturnURLForm, CustomFieldForm):
         queryset=Line.objects.all(),
         required=False
     )
-    site = forms.ModelChoiceField(
-        queryset=Site.objects.all(),
-        required=False,
-        label='Site',
-        widget=APISelect(
-            api_url="/api/dcim/sites/",
-			filter_for={
-                'device': 'site_id'
-            }
-        )
-    )
-    device = ChainedModelChoiceField(
+    device = forms.ModelChoiceField(
         queryset=Device.objects.all(),
-        chains=(
-            ('site', 'site'),
-        ),
-        required=False,
-        label='Device',
-        widget=APISelect(
-            api_url='/api/dcim/devices/',
-            display_field='display_name',
-            filter_for={
-                'dn': 'device_id'
-            }
-        )
+        required=False
     )
     tags = TagField(
         required=False
     )
-
     class Meta:
         model = Extension
         fields = [
-            'dn', 'partition', 'status', 'description', 'line', 'site', 'tags',
+            'dn', 'partition', 'status', 'description', 'device', 'tags', 'line',
         ]
         widgets = {
             'status': StaticSelect2()
         }
 
     def __init__(self, *args, **kwargs):
-
-        # Initialize helper selectors
         instance = kwargs.get('instance')
         initial = kwargs.get('initial', {}).copy()
+
         if instance and instance.dn is not None:
             initial['dn'] = instance.dn
         else:
             initial['dn'] = ''
-        kwargs['initial'] = initial
 
+        kwargs['initial'] = initial
         super().__init__(*args, **kwargs)
 
         self.fields['partition'].empty_label = 'Global'
 
-        # Limit line selections to those belonging to the parent device
-        if self.instance and self.instance.line:
+        if self.initial and 'line' in self.initial:
             self.fields['line'].queryset = Line.objects.filter(
-                device=self.instance.line.device
+                pk=self.initial['line']
+            )
+        elif 'line' not in self.initial:
+            try:
+                l = dict(args)
+                if 'line' in l:
+                    self.fields['line'].queryset = Line.objects.filter(
+                        pk=args['line']
+                    )
+                else:
+                    self.fields.pop('line')
+            except Exception as e:
+                print(e)
+        else:
+            self.fields.pop('line')
+
+        if self.initial and 'device' in self.initial:
+            self.fields['device'].queryset = Device.objects.filter(
+                pk=self.initial['device']
             )
         else:
-            self.fields['line'].choices = []
+            self.fields['device'].choices = []
 
-        if self.instance.pk and self.instance.line is not None:
-            parent = self.instance.line.parent
-
-    def clean(self):
-        super().clean()
 
     def save(self, *args, **kwargs):
-
         extension = super().save(*args, **kwargs)
-
-        # Assign/clear this Extension as the primary for the associated Device.
-        if self.cleaned_data['line']:
-            parent = self.cleaned_data['line'].parent
-            parent.save()
-
+        if 'line' in self.data:
+            line = self.data['line']
+            Line.objects.filter(pk=line).update(extension=extension)
 
         return extension
 
@@ -188,19 +171,6 @@ class ExtensionCSVForm(forms.ModelForm):
         choices=EXTENSION_STATUS_CHOICES,
         help_text='Operational status'
     )
-    device = FlexibleModelChoiceField(
-        queryset=Device.objects.all(),
-        required=False,
-        to_field_name='name',
-        help_text='Name or ID of assigned device',
-        error_messages={
-            'invalid_choice': 'Device not found.',
-        }
-    )
-    line_name = forms.CharField(
-        help_text='Name of assigned line',
-        required=False
-    )
     partition = FlexibleModelChoiceField(
         queryset=Partition.objects.all(),
         to_field_name='name',
@@ -211,7 +181,6 @@ class ExtensionCSVForm(forms.ModelForm):
         }
     )
 
-
     class Meta:
         model = Extension
         fields = Extension.csv_headers
@@ -219,35 +188,8 @@ class ExtensionCSVForm(forms.ModelForm):
     def clean(self):
         super().clean()
 
-        device = self.cleaned_data.get('device')
-        line_name = self.cleaned_data.get('line_name')
-
-        # Validate line
-        if line_name and device:
-            try:
-                self.instance.line = Line.objects.get(device=device, name=line_name)
-            except Line.DoesNotExist:
-                raise forms.ValidationError("Invalid line {} for device {}".format(
-                    line_name, device
-                ))
-        elif line_name:
-            raise forms.ValidationError("Line given ({}) but parent device not specified".format(
-                line_name
-            ))
-        elif device:
-            raise forms.ValidationError("Device specified ({}) but line missing".format(device))
-
     def save(self, *args, **kwargs):
-
-        # Set line
-        if self.cleaned_data['device'] and self.cleaned_data['line_name']:
-            self.instance.line = Line.objects.get(
-                device=self.cleaned_data['device'],
-                name=self.cleaned_data['line_name']
-            )
-
         dn = super().save(*args, **kwargs)
-
         return dn
 
 
@@ -315,7 +257,7 @@ class LineForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = Line
         fields = [
-            'device', 'name', 'description'
+            'device', 'name', 'description', 'extension'
         ]
         widgets = {
             'device': forms.HiddenInput(),
@@ -336,7 +278,6 @@ class LineCreateForm(ComponentForm, forms.Form):
 
     def __init__(self, *args, **kwargs):
 
-        # Set lines enabled by default
         kwargs['initial'] = kwargs.get('initial', {}).copy()
         kwargs['initial'].update({'enabled': True})
 

@@ -6,10 +6,14 @@ from netaddr.core import AddrFormatError
 
 from extras.filters import CustomFieldFilterSet
 from tenancy.filtersets import TenancyFilterSet
-from utilities.filters import NameSlugSearchFilterSet, NumericInFilter, TagFilter
+from utilities.filters import (
+    MultiValueMACAddressFilter, MultiValueNumberFilter, NameSlugSearchFilterSet, NumericInFilter, TagFilter,
+    TreeNodeMultipleChoiceFilter,
+)
 from .constants import EXTENSION_STATUS_CHOICES
 from .models import Extension, Partition, Line
 from dcim.models import Device
+from dcim.filters import DeviceComponentFilterSet
 
 class ExtensionFilter(CustomFieldFilterSet):
     id__in = NumericInFilter(
@@ -28,19 +32,8 @@ class ExtensionFilter(CustomFieldFilterSet):
         queryset=Partition.objects.all(),
         label='Partition',
     )
-    line = django_filters.ModelMultipleChoiceFilter(
-        field_name='line__name',
-        queryset=Line.objects.all(),
-        to_field_name='name',
-        label='Line (ID)',
-    )
-    line_id = django_filters.ModelMultipleChoiceFilter(
-        queryset=Line.objects.all(),
-        label='Line (ID)',
-    )
     status = django_filters.MultipleChoiceFilter(
-        choices=EXTENSION_STATUS_CHOICES,
-        null_value=None
+        choices=EXTENSION_STATUS_CHOICES
     )
     tag = TagFilter()
 
@@ -53,7 +46,7 @@ class ExtensionFilter(CustomFieldFilterSet):
             return queryset
         qs_filter = (
             Q(description__icontains=value) |
-            Q(dn__istartswith=value)
+            Q(dn__icontains=value)
         )
         return queryset.filter(qs_filter)
 
@@ -76,9 +69,13 @@ class ExtensionFilter(CustomFieldFilterSet):
             return queryset.none()
 
 
-class PartitionFilter(TenancyFilterSet, CustomFieldFilterSet):
+class PartitionFilter(CustomFieldFilterSet):
     id__in = NumericInFilter(
         field_name='id',
+        lookup_expr='in'
+    )
+    name__in = NumericInFilter(
+        field_name='name',
         lookup_expr='in'
     )
     q = django_filters.CharFilter(
@@ -100,25 +97,28 @@ class PartitionFilter(TenancyFilterSet, CustomFieldFilterSet):
         fields = ['name', 'enforce_unique']
 
 
-class LineFilter(django_filters.FilterSet):
-    q = django_filters.CharFilter(
-        method='search',
-        label='Search',
+class LineFilter(DeviceComponentFilterSet):
+    line_id = django_filters.ModelMultipleChoiceFilter(
+        field_name='id',
+        queryset=Line.objects.all(),
+        label='LINE (ID)',
     )
-    device_id = django_filters.ModelMultipleChoiceFilter(
-        queryset=Device.objects.all(),
-        label='Device (ID)',
-    )
-    device = django_filters.ModelChoiceFilter(
-        queryset=Device.objects.all(),
+    extension = django_filters.ModelMultipleChoiceFilter(
+        field_name='extension__name',
+        queryset=Extension.objects.all(),
         to_field_name='name',
-        label='Device (name)',
+        label='Extension (ID)',
     )
-    tag = TagFilter()
+    
+    class Meta:
+        model = Line
+        fields = ['id', 'name', 'description', 'extension', 'device']
 
     def search(self, queryset, name, value):
         if not value.strip():
             return queryset
         return queryset.filter(
-            Q(name__icontains=value)
-        )
+            Q(name__icontains=value) |
+            Q(description__icontains=value) |
+            Q(extension__icontains=value)
+        ).distinct()

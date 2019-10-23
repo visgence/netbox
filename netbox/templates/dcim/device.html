@@ -554,7 +554,7 @@
                         <strong>Interfaces</strong>
                         <div class="pull-right noprint">
                             <button class="btn btn-default btn-xs toggle-ips" selected="selected">
-                                <span class="glyphicon glyphicon-check" aria-hidden="true"></span> Show IPs / Extensions
+                                <span class="glyphicon glyphicon-check" aria-hidden="true"></span> Show IPs
                             </button>
                         </div>
                     </div>
@@ -623,8 +623,8 @@
                     <div class="panel-heading">
                         <strong>Lines</strong>
                         <div class="pull-right noprint">
-                            <button class="btn btn-default btn-xs toggle-ips" selected="selected">
-                                <span class="glyphicon glyphicon-check" aria-hidden="true"></span> Show IPs / Extensions
+                            <button class="btn btn-default btn-xs toggle-dn" selected="selected">
+                                <span class="glyphicon glyphicon-check" aria-hidden="true"></span> Show Extensions
                             </button>
                         </div>
                     </div>
@@ -633,9 +633,11 @@
                             <tr>
                                 {% if perms.ipphone.change_line or perms.ipphone.delete_line %}
                                     <th class="pk"><input type="checkbox" class="toggle" title="Toggle all" /></th>
+                                {% else %}
+                                    <th></th>
                                 {% endif %}
                                 <th>Name</th>
-                                <th>Connection</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -957,10 +959,20 @@ $('button.toggle-ips').click(function() {
     var selected = $(this).attr('selected');
     if (selected) {
         $('#interfaces_table tr.ipaddresses').hide();
-        $('#interfaces_table tr.extensions').hide();
     } else {
         $('#interfaces_table tr.ipaddresses').show();
-        $('#interfaces_table tr.extensions').show();
+    }
+    $(this).attr('selected', !selected);
+    $(this).children('span').toggleClass('glyphicon-check glyphicon-unchecked');
+    return false;
+});
+// Toggle the display of Extensions under lines
+$('button.toggle-dn').click(function() {
+    var selected = $(this).attr('selected');
+    if (selected) {
+        $('#lines_table tr.extensions').hide();
+    } else {
+        $('#lines_table tr.extensions').show();
     }
     $(this).attr('selected', !selected);
     $(this).children('span').toggleClass('glyphicon-check glyphicon-unchecked');

@@ -10,7 +10,6 @@ from utilities.paginator import EnhancedPaginator
 from utilities.views import (
     BulkCreateView, BulkDeleteView, BulkEditView, BulkImportView, ObjectDeleteView, ObjectEditView, ObjectListView, ComponentCreateView
 )
-from virtualization.models import VirtualMachine
 from . import filters, forms, tables
 from .constants import *
 from .models import Extension, Partition, Line
@@ -89,9 +88,7 @@ class PartitionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
 
 class ExtensionListView(PermissionRequiredMixin, ObjectListView):
     permission_required = 'ipphone.view_dn'
-    queryset = Extension.objects.prefetch_related(
-        'line__device'
-    )
+    queryset = Extension.objects.all()
     filter = filters.ExtensionFilter
     filter_form = forms.ExtensionFilterForm
     table = tables.ExtensionDetailTable
@@ -102,9 +99,24 @@ class ExtensionView(PermissionRequiredMixin, View):
     permission_required = 'ipphone.view_extension'
 
     def get(self, request, pk):
+        extension = get_object_or_404(Extension.objects.all(), pk=pk)
 
-        extension = get_object_or_404(Extension.objects.prefetch_related('line__device'), pk=pk)
+        if hasattr(extension, 'line'):
+            extension.line = Line.objects.get(extension=pk)
 
+        try:
+            if request.GET.get(line):
+                extension.line = Line.objects.get(pk=pk)
+        except:
+            pass
+        
+        if not hasattr(extension, 'line') and pk is not None:
+            try:
+                extension.line = Line.objects.get(extension=pk)
+            except:
+                pass
+
+        extension.partition.parent = Partition.objects.get(pk=extension.partition_id)
         return render(request, 'ipphone/extension.html', {
             'extension': extension,
         })
@@ -117,16 +129,6 @@ class ExtensionCreateView(PermissionRequiredMixin, ObjectEditView):
     template_name = 'ipphone/extension_edit.html'
     default_return_url = 'ipphone:extension_list'
 
-    def alter_obj(self, obj, request, url_args, url_kwargs):
-        line_id = request.GET.get('line')
-        if line_id:
-            try:
-                obj.line = Line.objects.get(pk=line_id)
-            except (ValueError, Line.DoesNotExist):
-                pass
-
-        return obj
-
 
 class ExtensionEditView(ExtensionCreateView):
     permission_required = 'ipphone.change_extension'
@@ -137,36 +139,27 @@ class ExtensionAssignView(PermissionRequiredMixin, View):
     Search for Extension Numbers to be assigned to an Line.
     """
     permission_required = 'ipphone.change_extension'
-
     def dispatch(self, request, *args, **kwargs):
-
         # Redirect user if an line has not been provided
         if 'line' not in request.GET:
             return redirect('ipphone:extension_add')
-
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-
         form = forms.ExtensionAssignForm()
-
         return render(request, 'ipphone/extension_assign.html', {
             'form': form,
             'return_url': request.GET.get('return_url', ''),
         })
 
     def post(self, request):
-
         form = forms.ExtensionAssignForm(request.POST)
         table = None
-
         if form.is_valid():
-
-            queryset = Extension.objects.prefetch_related(
-                'line__device'
-            ).filter(
+            queryset = Extension.objects.filter(
                 dn__istartswith=form.cleaned_data['dn'],
-            )[:100]  # Limit to 100 results
+            )[:100]
+
             table = tables.ExtensionAssignTable(queryset)
 
         return render(request, 'ipphone/extension_assign.html', {
@@ -193,7 +186,6 @@ class ExtensionBulkCreateView(PermissionRequiredMixin, BulkCreateView):
 
 class ExtensionBulkImportView(PermissionRequiredMixin, BulkImportView):
     permission_required = 'ipphone.add_extension'
-    # queryset = Extension.objects.all()
     model_form = forms.ExtensionCSVForm
     table = tables.ExtensionTable
     default_return_url = 'ipphone:extension_list'
@@ -201,7 +193,7 @@ class ExtensionBulkImportView(PermissionRequiredMixin, BulkImportView):
 
 class ExtensionBulkEditView(PermissionRequiredMixin, BulkEditView):
     permission_required = 'ipphone.change_extension'
-    queryset = Extension.objects.prefetch_related('line__device')
+    queryset = Extension.objects.all()
     filter = filters.ExtensionFilter
     table = tables.ExtensionTable
     form = forms.ExtensionBulkEditForm
@@ -210,7 +202,7 @@ class ExtensionBulkEditView(PermissionRequiredMixin, BulkEditView):
 
 class ExtensionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
     permission_required = 'ipphone.delete_extension'
-    queryset = Extension.objects.prefetch_related('line__device')
+    queryset = Extension.objects.prefetch_related('partition')
     filter = filters.ExtensionFilter
     table = tables.ExtensionTable
     default_return_url = 'ipphone:extension_list'
@@ -222,17 +214,14 @@ class ExtensionBulkDeleteView(PermissionRequiredMixin, BulkDeleteView):
 
 class LineView(PermissionRequiredMixin, View):
     permission_required = 'ipphone.view_line'
-
     def get(self, request, pk):
-
         line = get_object_or_404(Line, pk=pk)
-
         # Get assigned Extension
         extension_table = tables.LineExtensionTable(
-            data=line.extension.prefetch_related('partition'),
+            data=Extension.objects.filter(pk=line.extension_id),
             orderable=False
         )
-
+        
         return render(request, 'ipphone/line.html', {
             'line': line,
             'extension_table': extension_table,
